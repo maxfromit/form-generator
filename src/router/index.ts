@@ -6,16 +6,18 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'data-key-local-storage',
+      component: () => import('../views/DataPage.vue'),
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
+      path: '/:dataKey',
+      name: 'data-key',
+      component: () => import('../views/DataPage.vue'),
+    },
+    {
+      path: '/:dataKey/:id',
+      name: 'data-key-id',
+      component: () => import('../views/DataPage.vue'),
     },
   ],
 })
