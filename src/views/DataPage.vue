@@ -75,7 +75,7 @@ const clearStorage = () => {
     </nav>
     <GeneratedForm
       :formStructure="formStructure"
-      :formValueToEdit="formValueToEdit"
+      v-model:formValueToEdit="formValueToEdit"
       @update:modelValue="saveToStorage"
     />
   </div>

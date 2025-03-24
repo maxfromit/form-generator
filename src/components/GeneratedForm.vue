@@ -5,7 +5,6 @@ import type { FormField, FormValue } from '@/types/db-types'
 // Props
 const props = defineProps<{
   formStructure: FormField[]
-  formValueToEdit: FormValue[]
 }>()
 
 // Emit updated values back to the parent
@@ -14,12 +13,16 @@ const emit = defineEmits<{
   (e: 'update:modelValue', formValue: FormValue[]): void
 }>()
 
+const formValueToEdit = defineModel<FormValue[]>('formValueToEdit', {
+  default: [],
+})
+
 // Clone `modelValue` for editing
 const formValueToEditClone = ref<FormValue[]>([])
 
 // Watch for changes in the original `modelValue` and reset the clone
 watch(
-  () => props.formValueToEdit,
+  () => formValueToEdit.value,
   (newValue) => {
     formValueToEditClone.value = JSON.parse(JSON.stringify(newValue))
   },
@@ -33,7 +36,7 @@ const saveChanges = () => {
 
 // Discard changes and reset the clone to the original values
 const discardChanges = () => {
-  formValueToEditClone.value = [...props.formValueToEdit]
+  formValueToEditClone.value = [...formValueToEdit.value]
 }
 
 // Helper to dynamically determine the component type
@@ -97,9 +100,8 @@ function updateModelValue(fieldId: number, newValue: any, type: string) {
 <template>
   <form @submit.prevent="saveChanges" v-if="formValueToEditClone.length > 0">
     <!-- Render dynamic form fields -->
-    formValueToEditClone {{ formValueToEditClone }} props.formValueToEdit
-    {{ props.formValueToEdit }}
-    <div v-for="field in formStructure" :key="field.id" class="form-field">
+    formValueToEditClone {{ formValueToEditClone }} formValueToEdit.value
+    <div v-for="field in props.formStructure" :key="field.id" class="form-field">
       <label :for="`field-${field.id}`">{{ field.label }}</label>
 
       <!-- Dynamic input types -->
