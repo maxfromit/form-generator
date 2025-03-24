@@ -1,0 +1,57 @@
+{
+  "form-data": {
+    "form-customer": {
+      "structure": [
+        {
+          "id": 1,
+          "type": "input",
+          "label": "Name",
+          "placeholder": "Enter your name",
+          "dataType": "string"
+        },
+        {
+          "id": 2,
+          "type": "select",
+          "label": "Gender",
+          "options": ["Male", "Female", "Other"]
+        },
+        { "id": 3, "type": "checkbox", "label": "Subscribe to newsletter" },
+        {
+          "id": 4,
+          "type": "textarea",
+          "label": "Comments",
+          "placeholder": "Enter your comments"
+        },
+        {
+          "id": 5,
+          "type": "input",
+          "label": "Age",
+          "placeholder": "Enter your age",
+          "dataType": "number"
+        }
+      ],
+      "values": [
+        {
+          "id": 1,
+          "value": "Max"
+        },
+        {
+          "id": 2,
+          "value": "Male"
+        },
+        {
+          "id": 3,
+          "value": false
+        },
+        {
+          "id": 4,
+          "value": "My comments"
+        },
+        {
+          "id": 5,
+          "value": 32
+        }
+      ]
+    }
+  }
+}
