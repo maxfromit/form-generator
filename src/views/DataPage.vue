@@ -65,8 +65,10 @@ const clearStorage = () => {
 
 <template>
   <div>
-    <h1>dataKey {{ dataKey }}</h1>
-
+    <h1 v-if="dataKey">{{ dataKey }}</h1>
+    <h1 v-if="!dataKey">
+      {{ !!formStructure && formStructure.length > 0 ? 'Saved data' : 'No choosen form' }}
+    </h1>
     <button @click="navigateToNew">Create New</button>
     <button @click="clearStorage">Clear LocalStorage</button>
     formValues {{ formValues }}
@@ -74,6 +76,7 @@ const clearStorage = () => {
       <RouterLink :to="`/${dataKey}/${index}`">Form {{ index + 1 }}</RouterLink>
     </nav>
     <GeneratedForm
+      v-if="formStructure && formStructure.length > 0"
       :formStructure="formStructure"
       v-model:formValueToEdit="formValueToEdit"
       @update:modelValue="saveToStorage"
