@@ -71,23 +71,26 @@ const clearStorage = () => {
 </script>
 
 <template>
-  <div>
-    <div>store.state {{ store.state }}</div>
-    <div>formValueToEdit {{ formValueToEdit }}</div>
-    <h1 v-if="dataKey">{{ dataKey }}</h1>
-    <h1 v-if="!valueIndex">
-      {{ !!formStructure && formStructure.length > 0 ? 'Saved data' : 'No choosen form' }}
-    </h1>
-    <button @click="navigateToNew">Create New</button>
-    <button @click="clearStorage">Clear LocalStorage</button>
-    <div>formStructure {{ formStructure }}</div>
+  <div style="display: flex; flex-direction: column; gap: 2rem">
+    <div style="display: flex; flex-direction: column; gap: 1rem">
+      <div style="display: flex; justify-content: space-between; flex-wrap: nowrap">
+        <div>
+          <h1 v-if="dataKey" style="text-transform: uppercase">{{ dataKey }}</h1>
+          <div v-if="!valueIndex">
+            {{ !!formStructure && formStructure.length > 0 ? 'Local Data' : 'No choosen form' }}
+          </div>
+        </div>
+        <div>
+          <button @click="clearStorage">Clear</button>
+        </div>
+      </div>
+      <div style="display: flex">
+        <nav v-for="(value, index) in formValuesFromDb" :key="index">
+          <RouterLink :to="`/${dataKey}/${index}`">Data Set {{ index + 1 }}</RouterLink>
+        </nav>
+      </div>
+    </div>
 
-    <div>formValuesFromDb {{ formValuesFromDb }}</div>
-    <div>choosenFormValues {{ choosenFormValues }}</div>
-    <div>valueIndex.value {{ valueIndex }}</div>
-    <nav v-for="(value, index) in formValuesFromDb" :key="index">
-      <RouterLink :to="`/${dataKey}/${index}`">Form {{ index + 1 }}</RouterLink>
-    </nav>
     <GeneratedForm
       v-if="!!formStructure && formStructure.length > 0 && !!formValueToEdit"
       :formStructure="formStructure"
@@ -96,7 +99,10 @@ const clearStorage = () => {
     >
       <!-- Custom slots for specific fields -->
       <template v-slot:[`input1`]>
-        <div>Custom Input 1</div>
+        <div>
+          Custom Input 1
+          {{ formValueToEdit.find((item) => item.id === 1).value }}
+        </div>
       </template>
       <template v-slot:[`textarea2`]>
         <div>Custom Textarea 2</div>
@@ -112,5 +118,12 @@ const clearStorage = () => {
     display: flex;
     align-items: center;
   }
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
