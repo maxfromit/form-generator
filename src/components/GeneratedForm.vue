@@ -10,7 +10,7 @@ const props = defineProps<{
 // Emit updated values back to the parent
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', formValue: FormValue[]): void
+  (e: 'save', formValue: FormValue[]): void
 }>()
 
 const formValueToEdit = defineModel<FormValue[]>('formValueToEdit', {
@@ -24,20 +24,10 @@ const formValueToEditClone = ref<FormValue[]>([])
 watch(
   () => formValueToEdit.value,
   (newValue) => {
-    formValueToEditClone.value = JSON.parse(JSON.stringify(newValue))
+    if (!!newValue) formValueToEditClone.value = JSON.parse(JSON.stringify(newValue))
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
-
-// Save changes and emit updated values
-const saveChanges = () => {
-  emit('update:modelValue', [...formValueToEditClone.value])
-}
-
-// Discard changes and reset the clone to the original values
-const discardChanges = () => {
-  formValueToEditClone.value = [...formValueToEdit.value]
-}
 
 // Helper to dynamically determine the component type
 const getFieldComponent = (type: string) => {
@@ -63,7 +53,6 @@ const getFieldAttributes = (field: FormField) => {
 
   if (field.type === 'checkbox') {
     attributes.type = 'checkbox'
-    console.log('getModelValue(field.id)', getModelValue(field.id))
     attributes.checked = getModelValue(field.id) === 'true' ? true : false
   } else if (field.type === 'input') {
     attributes.type = field.dataType === 'number' ? 'number' : 'text'
@@ -75,12 +64,11 @@ const getFieldAttributes = (field: FormField) => {
 }
 
 function getFieldById(id: number) {
-  console.log('formValueToEditClone.value', formValueToEditClone.value)
-
   return formValueToEditClone.value.find((item) => item.id === id)
 }
 
 function getModelValue(fieldId: number) {
+  console.log('getModelValue', fieldId)
   const field = getFieldById(fieldId)
   return field ? field.value : null
 }
@@ -95,12 +83,23 @@ function updateModelValue(fieldId: number, newValue: any, type: string) {
     }
   }
 }
+
+// Save changes and emit updated values
+const saveChanges = () => {
+  console.log('emit formValueToEditClone.value', formValueToEditClone.value)
+  emit('save', formValueToEditClone.value)
+}
+
+// Discard changes and reset the clone to the original values
+const discardChanges = () => {
+  formValueToEditClone.value = [...formValueToEdit.value]
+}
 </script>
 
 <template>
-  <form @submit.prevent="saveChanges" v-if="formValueToEditClone.length > 0">
+  <form @submit.prevent="saveChanges">
     <!-- Render dynamic form fields -->
-    formValueToEditClone {{ formValueToEditClone }} formValueToEdit.value
+    formValueToEditClone {{ formValueToEditClone }}
     <div v-for="field in props.formStructure" :key="field.id" class="form-field">
       <label :for="`field-${field.id}`">{{ field.label }}</label>
 

@@ -1,13 +1,14 @@
 import { createStore } from 'vuex'
 import axios from 'axios'
+import { useStorage } from '@vueuse/core'
 import type { FormData, State, FormValue, FormField, FormDataCollection } from '@/types/db-types'
 
 export default createStore({
   state: {
     keys: [] as string[], // All keys from the database
     formStructure: null as FormField[] | null, // Structure of the form for a specific key
-    formValues: [] as FormValue[], // Array of values for a specific key
-    selectedValue: null as FormValue | null, // A specific value by key and ID
+    formValues: [] as FormValue[], // Values fetched from db.json
+    local: useStorage<Record<string, { values: FormValue[] }>>('localData', {}), // Automatically synced with localStorage
   },
   mutations: {
     setKeys(state: State, keys: string[]) {
@@ -19,8 +20,11 @@ export default createStore({
     setFormValues(state: State, values: FormValue[]) {
       state.formValues = values
     },
-    setSelectedValue(state: State, value: FormValue) {
-      state.selectedValue = value
+    setLocalValues(state: State, { dataKey, values }: { dataKey: string; values: FormValue[] }) {
+      if (!state.local[dataKey]) {
+        state.local[dataKey] = { values: [] }
+      }
+      state.local[dataKey].values = values
     },
   },
   actions: {
@@ -35,69 +39,38 @@ export default createStore({
       }
     },
 
-    // 2. Fetch data structure and values by key
+    // 2. Fetch data structure and values by key from db.json
     async fetchDataByKey({ commit }, key: string) {
-      console.log('key:', key)
+      console.log('Fetching data from db.json for key:', key)
 
       try {
         const response = await axios.get<FormDataCollection>(`http://localhost:4000/form-data/`)
-        const dataBykey = response.data[key]
-        commit('setFormStructure', dataBykey.structure)
-        commit('setFormValues', dataBykey.values)
+        const dataByKey = response.data[key]
+        commit('setFormStructure', dataByKey.structure) // Set the form structure
+        commit('setFormValues', dataByKey.values) // Set the form values from db.json
       } catch (error) {
         console.error(`Error fetching data for key "${key}":`, error)
       }
     },
 
-    // 3. Fetch a specific value by key and ID
-    async fetchValueByKeyAndId({ commit }, { key, id }: { key: string; id: number }) {
-      try {
-        const response = await axios.get<FormDataCollection>(`http://localhost:4000/form-data/`)
-        const dataByKey = response.data[key] // Extract the data for the specific key
-        const value = dataByKey.values.find((item: any) => item.id === id) // Find the specific value by ID
-        commit('setSelectedValue', value)
-      } catch (error) {
-        console.error(`Error fetching value for key "${key}" and ID "${id}":`, error)
-      }
-    },
-    // Load data from localStorage
-    loadFromLocalStorage({ commit }) {
-      const formStructure = localStorage.getItem('formStructure')
-      const formValues = localStorage.getItem('formValues')
-
-      if (formStructure && formValues) {
-        console.log('formStructure:', formStructure)
-        console.log('formValues:', formValues)
-        commit('setFormStructure', JSON.parse(formStructure))
-        commit('setFormValues', JSON.parse(formValues))
-        console.log('Data loaded from localStorage:', {
-          formStructure: JSON.parse(formStructure),
-          formValues: JSON.parse(formValues),
-        })
-      } else {
-        console.log('No data found in localStorage.')
-      }
-    },
+    // 3. Save formValues to localStorage by dataKey
     saveToLocalStorage(
-      { commit },
-      { formValues, formStructure }: { formValues: FormValue[]; formStructure: FormField[] },
+      { state },
+      { dataKey, formValues }: { dataKey: string; formValues: FormValue[] },
     ) {
-      // Save formStructure and formValues to localStorage
-      localStorage.setItem('formStructure', JSON.stringify(formStructure))
-      localStorage.setItem('formValues', JSON.stringify(formValues))
-
-      console.log('Data saved to localStorage:', {
-        formStructure,
-        formValues,
-      })
+      if (!state.local[dataKey]) {
+        state.local[dataKey] = { values: [] }
+      }
+      state.local[dataKey].values = formValues
+      console.log(`Data saved to localStorage under key "${dataKey}"`, formValues)
     },
-    // Clear localStorage and reset Vuex state
-    clearLocalStorage({ commit }) {
-      localStorage.removeItem('formStructure')
-      localStorage.removeItem('formValues')
-      commit('setFormStructure', null)
-      commit('setFormValues', [])
-      console.log('LocalStorage cleared and Vuex state reset.')
+
+    // 4. Clear localStorage for a specific dataKey
+    clearLocalStorage({ state }, dataKey: string) {
+      if (state.local[dataKey]) {
+        delete state.local[dataKey]
+      }
+      console.log(`LocalStorage cleared for key "${dataKey}"`)
     },
   },
 })
