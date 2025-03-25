@@ -93,7 +93,15 @@ const clearStorage = () => {
       :formStructure="formStructure"
       v-model:formValueToEdit="formValueToEdit"
       @save="saveToStorage"
-    />
+    >
+      <!-- Custom slots for specific fields -->
+      <template v-slot:[`input1`]>
+        <div>Custom Input 1</div>
+      </template>
+      <template v-slot:[`textarea2`]>
+        <div>Custom Textarea 2</div>
+      </template>
+    </GeneratedForm>
   </div>
 </template>
 

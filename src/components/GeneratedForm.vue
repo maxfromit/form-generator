@@ -101,27 +101,29 @@ const discardChanges = () => {
     <!-- Render dynamic form fields -->
     formValueToEditClone {{ formValueToEditClone }}
     <div v-for="field in props.formStructure" :key="field.id" class="form-field">
-      <label :for="`field-${field.id}`">{{ field.label }}</label>
+      <slot :name="`${field.type}${field.id}`">
+        <!-- Default content if no slot is provided -->
+        <label :for="`field-${field.id}`">{{ field.label }}</label>
 
-      <!-- Dynamic input types -->
-
-      <component
-        :is="getFieldComponent(field.type)"
-        :id="`field-${field.id}`"
-        :value="getModelValue(field.id)"
-        @input="(event) => updateModelValue(field.id, event.target.value, field.type)"
-        v-bind="getFieldAttributes(field)"
-      >
-        <!-- Render options for select fields -->
-        <option
-          v-if="field.type === 'select'"
-          v-for="option in field.options"
-          :key="option"
-          :value="option"
+        <!-- Dynamic input types -->
+        <component
+          :is="getFieldComponent(field.type)"
+          :id="`field-${field.id}`"
+          :value="getModelValue(field.id)"
+          @input="(event) => updateModelValue(field.id, event.target.value, field.type)"
+          v-bind="getFieldAttributes(field)"
         >
-          {{ option }}
-        </option>
-      </component>
+          <!-- Render options for select fields -->
+          <option
+            v-if="field.type === 'select'"
+            v-for="option in field.options"
+            :key="option"
+            :value="option"
+          >
+            {{ option }}
+          </option>
+        </component>
+      </slot>
     </div>
 
     <!-- Buttons -->
