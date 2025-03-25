@@ -16,9 +16,11 @@ const formKeys = computed(() => store.state.keys)
   <div>
     <h1><RouterLink to="/">Form Generator</RouterLink></h1>
 
-    <nav v-for="dataKey in formKeys" :key="dataKey">
-      <RouterLink :to="`/${dataKey}`">{{ dataKey }}</RouterLink>
-    </nav>
+    <div style="display: flex">
+      <nav v-for="dataKey in formKeys" :key="dataKey" style="text-transform: uppercase">
+        <RouterLink :to="`/${dataKey}`">{{ dataKey }}</RouterLink>
+      </nav>
+    </div>
   </div>
 </template>
 
