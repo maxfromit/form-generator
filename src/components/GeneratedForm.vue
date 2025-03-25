@@ -29,6 +29,10 @@ watch(
   { immediate: true, deep: true },
 )
 
+const isDiscardDisabled = computed(() => {
+  return JSON.stringify(formValueToEditClone.value) === JSON.stringify(formValueToEdit.value)
+})
+
 // Helper to dynamically determine the component type
 const getFieldComponent = (type: string) => {
   switch (type) {
@@ -99,7 +103,6 @@ const discardChanges = () => {
 <template>
   <form @submit.prevent="saveChanges">
     <!-- Render dynamic form fields -->
-    formValueToEditClone {{ formValueToEditClone }}
     <div v-for="field in props.formStructure" :key="field.id" class="form-field">
       <slot :name="`${field.type}${field.id}`">
         <!-- Default content if no slot is provided -->
@@ -128,7 +131,7 @@ const discardChanges = () => {
 
     <!-- Buttons -->
     <div class="form-actions">
-      <button type="button" @click="discardChanges">Discard</button>
+      <button type="button" @click="discardChanges" :disabled="isDiscardDisabled">Discard</button>
       <button type="submit">Save</button>
     </div>
   </form>
