@@ -1,37 +1,56 @@
 import { createStore } from 'vuex'
 import axios from 'axios'
-import { useStorage } from '@vueuse/core'
-import type { FormData, State, FormValue, FormField, FormDataCollection } from '@/types/db-types'
+import { useStorage, StorageSerializers } from '@vueuse/core'
+import type { RemovableRef } from '@vueuse/core'
+
+import type {
+  FormModel,
+  ValueType,
+  FormStructure,
+  FormCollection,
+} from '@/components/FormGenerator/types'
+
+type State = {
+  keys: string[] // All keys from the database
+  formStructure: FormStructure | null // Structure of the form for a specific key
+  fetchedFormValues: FormModel // Array of values for a specific key
+  // localFormValues: RemovableRef<Record<string, { values: ValueType[] }> | null> // Reactive and synced with localStorage
+  localFormValues: Record<string, { values: ValueType[] }> | null // Reactive and synced with localStorage
+}
+
+const state: State = {
+  keys: [], // All keys from the database
+  formStructure: [], // Structure of the form for a specific key
+  fetchedFormValues: [], // Values fetched from db.json
+  localFormValues: useStorage('localData', null, undefined, {
+    serializer: StorageSerializers.object,
+  }), // Automatically synced with localStorage
+
+  // localFormValues: useStorage('localData', null), // Automatically synced with localStorage
+}
 
 export default createStore({
-  state: {
-    keys: [] as string[], // All keys from the database
-    formStructure: null as FormField[] | null, // Structure of the form for a specific key
-    formValues: [] as FormValue[], // Values fetched from db.json
-    local: useStorage<Record<string, { values: FormValue[] }>>('localData', {}), // Automatically synced with localStorage
-  },
+  state, // Use the pre-defined state object
   mutations: {
     setKeys(state: State, keys: string[]) {
       state.keys = keys
     },
-    setFormStructure(state: State, structure: FormField[]) {
+    setFormStructure(state: State, structure: FormStructure) {
       state.formStructure = structure
     },
-    setFormValues(state: State, values: FormValue[]) {
-      state.formValues = values
+    setFormValues(state: State, values: FormModel) {
+      state.fetchedFormValues = values
     },
-    setLocalValues(state: State, { dataKey, values }: { dataKey: string; values: FormValue[] }) {
-      if (!state.local[dataKey]) {
-        state.local[dataKey] = { values: [] }
-      }
-      state.local[dataKey].values = values
+    clearFetchedForm(state: State) {
+      state.formStructure = [] // Reset formStructure to null
+      state.fetchedFormValues = [] // Reset formStructure to null
     },
   },
   actions: {
     // 1. Fetch all keys from the database
     async fetchKeys({ commit }) {
       try {
-        const response = await axios.get<FormDataCollection>('http://localhost:4000/form-data')
+        const response = await axios.get<FormCollection>('http://localhost:4000/form-data')
         const keys = Object.keys(response.data)
         commit('setKeys', keys)
       } catch (error) {
@@ -44,7 +63,7 @@ export default createStore({
       console.log('Fetching data from db.json for key:', key)
 
       try {
-        const response = await axios.get<FormDataCollection>(`http://localhost:4000/form-data/`)
+        const response = await axios.get<FormCollection>(`http://localhost:4000/form-data/`)
         const dataByKey = response.data[key]
         commit('setFormStructure', dataByKey.structure) // Set the form structure
         commit('setFormValues', dataByKey.values) // Set the form values from db.json
@@ -55,20 +74,29 @@ export default createStore({
 
     // 3. Save formValues to localStorage by dataKey
     saveToLocalStorage(
-      { state },
-      { dataKey, formValues }: { dataKey: string; formValues: FormValue[] },
+      { state }: { state: State },
+      { dataKey, formValues }: { dataKey: string; formValues: ValueType[] },
     ) {
-      if (!state.local[dataKey]) {
-        state.local[dataKey] = { values: [] }
+      console.log('typeof state.localFormValues', typeof state.localFormValues)
+      if (!state.localFormValues) {
+        state.localFormValues = {} // Initialize as an empty object
       }
-      state.local[dataKey].values = formValues
+
+      // Check if the specific dataKey does not exist and initialize it
+      if (!state.localFormValues[dataKey]) {
+        state.localFormValues[dataKey] = { values: [] }
+      }
+
+      // Update the values for the given dataKey
+      state.localFormValues[dataKey].values = formValues
+
       console.log(`Data saved to localStorage under key "${dataKey}"`, formValues)
     },
 
     // 4. Clear localStorage for a specific dataKey
     clearLocalStorage({ state }, dataKey: string) {
-      if (state.local[dataKey]) {
-        delete state.local[dataKey]
+      if (state.localFormValues[dataKey]) {
+        delete state.localFormValues[dataKey]
       }
       console.log(`LocalStorage cleared for key "${dataKey}"`)
     },
