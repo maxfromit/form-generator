@@ -49,8 +49,11 @@ watchEffect(() => {
   formValueToEdit.value = [...choosenFormValues.value]
 })
 
-const saveToStorage = (dataValue: FormModel) => {
-  formValueToEdit.value = [...dataValue]
+const resetToChoosen = () => {
+  formValueToEdit.value = [...choosenFormValues.value]
+}
+
+const saveToStorage = () => {
   store.dispatch('saveToLocalStorage', {
     dataKey: dataKey.value,
     formValues: formValueToEdit.value,
@@ -66,11 +69,11 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
 </script>
 
 <template>
-  <div style="display: flex; flex-direction: column; gap: 2rem">
-    <div style="display: flex; flex-direction: column; gap: 0.2rem">
-      <div style="display: flex; justify-content: space-between; flex-wrap: nowrap">
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-0-2">
+      <div class="flex justify-between flex-nowrap">
         <div>
-          <h1 v-if="dataKey" style="text-transform: uppercase">{{ dataKey }}</h1>
+          <h1 v-if="dataKey" class="first-letter-uppercase">{{ dataKey }}</h1>
           <div v-if="!formStructure || formStructure.length === 0">Choose entity to get forms</div>
         </div>
         <div>
@@ -78,7 +81,7 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
         </div>
       </div>
 
-      <div style="display: flex; gap: 1rem">
+      <div class="flex gap-1">
         <nav>
           <RouterLink :to="`/${dataKey}/`">Local Data Set</RouterLink>
         </nav>
@@ -93,6 +96,7 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
       :structure="formStructure"
       v-model="formValueToEdit"
       @save="saveToStorage"
+      @discard="resetToChoosen"
     >
       <!-- Custom slots for specific fields -->
       <template v-slot:[`field_1`]>
@@ -109,6 +113,38 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
 </template>
 
 <style scoped>
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.first-letter-uppercase::first-letter {
+  text-transform: uppercase;
+}
+
+.gap-0-2 {
+  gap: 0.2rem;
+}
+
+.gap-1 {
+  gap: 1rem;
+}
+
+.gap-2 {
+  gap: 2rem;
+}
+
 nav a.router-link-active {
   color: var(--color-text);
 }

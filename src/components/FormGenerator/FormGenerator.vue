@@ -10,26 +10,14 @@ defineProps<{
 const model = defineModel<FormModel>()
 
 // Emit updated values back to the parent
-
 const emit = defineEmits<{
-  (e: 'save', formValue: FormModel): void
+  (e: 'save'): void
+  (e: 'discard'): void
 }>()
 
-// Clone `modelValue` for editing
-const formValueToEditClone = ref<FormModel>([])
-
-// Watch for changes in the original `modelValue` and reset the clone
-watch(
-  () => model.value,
-  (newValue) => {
-    if (!!newValue) formValueToEditClone.value = JSON.parse(JSON.stringify(newValue))
-  },
-  { immediate: true, deep: true },
-)
-
-const isDiscardDisabled = computed(() => {
-  return JSON.stringify(formValueToEditClone.value) === JSON.stringify(model.value)
-})
+// const isDiscardDisabled = computed(() => {
+//   return JSON.stringify(model.value) === JSON.stringify(model.value)
+// })
 
 // Helper to dynamically determine the component type
 const getFieldComponent = (type: string) => {
@@ -66,35 +54,28 @@ const getFieldAttributes = (field: FieldDefinition) => {
 }
 
 function getFieldByIndex(index: number) {
-  return formValueToEditClone.value[index]
+  return model.value[index]
 }
 
 function getModelValue(index: number) {
-  return formValueToEditClone.value[index] ?? null
+  return model.value[index] ?? null
 }
 
 function updateModelValue(index: number, newValue: any, type: string) {
   if (type === 'checkbox') {
-    formValueToEditClone.value[index] = newValue === 'true' ? 'false' : 'true'
+    model.value[index] = newValue === 'true' ? 'false' : 'true'
   } else {
-    formValueToEditClone.value[index] = newValue
+    model.value[index] = newValue
   }
 }
 
 // Save changes and emit updated values
-const saveChanges = () => {
-  console.log('emit formValueToEditClone.value', formValueToEditClone.value)
-  emit('save', formValueToEditClone.value)
-}
 
 // Discard changes and reset the clone to the original values
-const discardChanges = () => {
-  formValueToEditClone.value = [...model.value]
-}
 </script>
 
 <template>
-  <form @submit.prevent="saveChanges">
+  <form @submit.prevent="emit('save')">
     <!-- Render dynamic form fields -->
     <div v-for="(field, index) in structure" :key="field.id" class="form-field">
       <slot :name="`field_${field.id}`">
@@ -121,7 +102,7 @@ const discardChanges = () => {
 
     <!-- Buttons -->
     <div class="form-actions">
-      <button type="button" @click="discardChanges" :disabled="isDiscardDisabled">Discard</button>
+      <button type="button" @click="emit('discard')" :disabled="isDiscardDisabled">Discard</button>
       <button type="submit">Save</button>
     </div>
   </form>
