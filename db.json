@@ -30,30 +30,7 @@
           "dataType": "number"
         }
       ],
-      "values": [
-        [
-          {
-            "id": 1,
-            "value": "Max"
-          },
-          {
-            "id": 2,
-            "value": "Male"
-          },
-          {
-            "id": 3,
-            "value": false
-          },
-          {
-            "id": 4,
-            "value": "My comments"
-          },
-          {
-            "id": 5,
-            "value": 32
-          }
-        ]
-      ]
+      "values": ["Max", "Male", false, "My comments", 32]
     },
     "products": {
       "structure": [
@@ -83,44 +60,7 @@
           "label": "Available in stock"
         }
       ],
-      "values": [
-        [
-          {
-            "id": 1,
-            "value": "Laptop"
-          },
-          {
-            "id": 2,
-            "value": 1200
-          },
-          {
-            "id": 3,
-            "value": "High-performance laptop"
-          },
-          {
-            "id": 4,
-            "value": true
-          }
-        ],
-        [
-          {
-            "id": 1,
-            "value": "Smartphone"
-          },
-          {
-            "id": 2,
-            "value": 800
-          },
-          {
-            "id": 3,
-            "value": "Latest model smartphone"
-          },
-          {
-            "id": 4,
-            "value": false
-          }
-        ]
-      ]
+      "values": ["Laptop", 1200, "High-performance laptop", true]
     }
   }
 }
