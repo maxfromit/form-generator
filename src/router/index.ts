@@ -10,13 +10,8 @@ const router = createRouter({
       component: () => import('../views/DataPage.vue'),
     },
     {
-      path: '/:dataKey',
-      name: 'data-key',
-      component: () => import('../views/DataPage.vue'),
-    },
-    {
-      path: '/:dataKey/:id',
-      name: 'data-key-id',
+      path: '/:dataKey/:id?',
+      name: 'data-key', // Single name for both routes
       component: () => import('../views/DataPage.vue'),
     },
   ],
