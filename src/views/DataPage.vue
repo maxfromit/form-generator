@@ -2,17 +2,15 @@
 import { defineComponent, computed, onMounted, watch, ref, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import type { FormData, FormValue, FormField, FormDataCollection } from '@/types/db-types'
-import GeneratedForm from '@/components/GeneratedForm.vue'
+import type { FormModel, ValueType, FieldDefinition } from '@/components/FormGenerator/types'
+import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
 const router = useRouter()
 
 const store = useStore()
 
-const dataKey = computed(() => router.currentRoute.value.params.dataKey)
+const dataKey = computed(() => router.currentRoute.value.params.dataKey ?? null)
 const valueIndex = computed(() =>
-  router.currentRoute.value.params.id && typeof router.currentRoute.value.params.id === 'string'
-    ? parseInt(router.currentRoute.value.params.id, 10)
-    : null,
+  router.currentRoute.value.params.id ? router.currentRoute.value.params.id : null,
 )
 
 watch(
@@ -21,87 +19,91 @@ watch(
     if (newKey) {
       store.dispatch('fetchDataByKey', dataKey.value)
     }
+    if (!newKey) store.commit('clearFetchedForm')
   },
   { immediate: true },
 )
-console.log('fetchDataByKey', store)
+console.log('store.state.localFormValues', store.state.localFormValues)
 const formStructure = computed(() => store.state.formStructure ?? [])
-const formValuesFromDb = computed(() => store.state.formValues ?? [])
+const formValuesFromDb = computed(() => store.state.fetchedFormValues ?? [])
 const formValuesFromLocal = computed(() =>
-  dataKey.value ? store.state.local[dataKey.value]?.values || [] : [],
+  dataKey.value ? store.state.localFormValues[dataKey.value]?.values || [] : [],
 )
 
 const choosenFormValues = computed(() => {
-  if (valueIndex.value !== null && formValuesFromDb.value.length > 0) {
-    return formValuesFromDb.value[valueIndex.value]
+  if (valueIndex.value === 'fetched' && formValuesFromDb.value.length > 0) {
+    return [...formValuesFromDb.value]
   }
-  if (formValuesFromLocal.value.length > 0) {
-    return formValuesFromLocal.value
-  }
-  // Generate default form values based on formStructure
-  return formStructure.value.map((field: FormField) => ({
-    id: field.id,
-    value: field.type === 'checkbox' ? false : null, // Default value for checkboxes is false, otherwise null
-  }))
+  // if (!valueIndex.value && formValuesFromLocal.value.length > 0) {
+  return [...formValuesFromLocal.value]
+  // }
+  // return getClearedValues()
 })
 
-const formValueToEdit = ref<FormValue[]>([])
+const getClearedValues = () =>
+  formStructure.value.map((field: FieldDefinition) => (field.type === 'checkbox' ? false : null))
+
+const formValueToEdit = ref<ValueType[]>([])
 
 watchEffect(() => {
   formValueToEdit.value = [...choosenFormValues.value]
 })
 
-const navigateToNew = () => {
-  router.push(`/${dataKey.value}/new`)
-}
-
-const saveToStorage = (dataValue: FormValue[]) => {
-  console.log('data', dataValue)
+const saveToStorage = (dataValue: FormModel) => {
   formValueToEdit.value = [...dataValue]
-  // Dispatch the Vuex action with dataKey and formValues
   store.dispatch('saveToLocalStorage', {
-    dataKey: dataKey.value, // Pass the current dataKey
-    formValues: formValueToEdit.value, // Pass the updated formValues
+    dataKey: dataKey.value,
+    formValues: formValueToEdit.value,
   })
+  router.push(`/${dataKey.value}/`)
 }
 
-const clearStorage = () => {
-  store.dispatch('clearLocalStorage', dataKey.value)
+const clearForm = () => {
+  formValueToEdit.value = [...getClearedValues()]
 }
+
+const clearFormFull = () => {
+  store.dispatch('clearLocalStorageFull')
+}
+
+console.log(' store.state.local', store.state?.localFormValues, typeof store.state?.localFormValues)
 </script>
 
 <template>
   <div style="display: flex; flex-direction: column; gap: 2rem">
-    <div style="display: flex; flex-direction: column; gap: 1rem">
+    <div style="display: flex; flex-direction: column; gap: 0.2rem">
       <div style="display: flex; justify-content: space-between; flex-wrap: nowrap">
         <div>
           <h1 v-if="dataKey" style="text-transform: uppercase">{{ dataKey }}</h1>
-          <div v-if="!valueIndex">
-            {{ !!formStructure && formStructure.length > 0 ? 'Local Data' : 'No choosen form' }}
-          </div>
+          <div v-if="!formStructure || formStructure.length === 0">Choose entity to get forms</div>
         </div>
         <div>
-          <button @click="clearStorage">Clear</button>
+          <button @click="clearForm">Clear</button>
+          <button @click="clearFormFull">ClearFull</button>
         </div>
       </div>
-      <div style="display: flex">
-        <nav v-for="(value, index) in formValuesFromDb" :key="index">
-          <RouterLink :to="`/${dataKey}/${index}`">Data Set {{ index + 1 }}</RouterLink>
+
+      <div style="display: flex; gap: 1rem">
+        <nav>
+          <RouterLink :to="`/${dataKey}/`">Local Data Set</RouterLink>
+        </nav>
+        <nav>
+          <RouterLink :to="`/${dataKey}/fetched`">Fetched Data Set</RouterLink>
         </nav>
       </div>
     </div>
 
     <GeneratedForm
       v-if="!!formStructure && formStructure.length > 0 && !!formValueToEdit"
-      :formStructure="formStructure"
-      v-model:formValueToEdit="formValueToEdit"
+      :structure="formStructure"
+      v-model="formValueToEdit"
       @save="saveToStorage"
     >
       <!-- Custom slots for specific fields -->
-      <template v-slot:[`input1`]>
+      <template v-slot:[`field_1`]>
         <div>
           Custom Input 1
-          {{ formValueToEdit.find((item) => item.id === 1).value }}
+          {{ formValueToEdit[0] }}
         </div>
       </template>
       <template v-slot:[`textarea2`]>
@@ -111,7 +113,23 @@ const clearStorage = () => {
   </div>
 </template>
 
-<style>
+<style scoped>
+nav a.router-link-active {
+  color: var(--color-text);
+}
+
+nav a.router-link-active:hover {
+  background-color: transparent;
+}
+
+nav a {
+  display: inline-block;
+}
+
+nav a:first-of-type {
+  border: 0;
+}
+
 @media (min-width: 1024px) {
   .about {
     min-height: 100vh;
