@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineComponent, computed, onMounted, watch, ref, watchEffect } from 'vue'
+import { computed, watch, ref, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import type { FormModel, ValueType, FieldDefinition } from '@/components/FormGenerator/types'
@@ -62,10 +62,6 @@ const clearForm = () => {
   formValueToEdit.value = [...getClearedValues()]
 }
 
-const clearFormFull = () => {
-  store.dispatch('clearLocalStorageFull')
-}
-
 console.log(' store.state.local', store.state?.localFormValues, typeof store.state?.localFormValues)
 </script>
 
@@ -79,7 +75,6 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
         </div>
         <div>
           <button @click="clearForm">Clear</button>
-          <button @click="clearFormFull">ClearFull</button>
         </div>
       </div>
 
