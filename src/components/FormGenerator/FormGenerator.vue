@@ -1,28 +1,26 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import type { FormField, FormValue } from '@/types/db-types'
+import type { FieldDefinition, FormModel, FormStructure } from '@/components/FormGenerator/types'
 
 // Props
-const props = defineProps<{
-  formStructure: FormField[]
+defineProps<{
+  structure: FormStructure
 }>()
+
+const model = defineModel<FormModel>()
 
 // Emit updated values back to the parent
 
 const emit = defineEmits<{
-  (e: 'save', formValue: FormValue[]): void
+  (e: 'save', formValue: FormModel): void
 }>()
 
-const formValueToEdit = defineModel<FormValue[]>('formValueToEdit', {
-  default: [],
-})
-
 // Clone `modelValue` for editing
-const formValueToEditClone = ref<FormValue[]>([])
+const formValueToEditClone = ref<FormModel>([])
 
 // Watch for changes in the original `modelValue` and reset the clone
 watch(
-  () => formValueToEdit.value,
+  () => model.value,
   (newValue) => {
     if (!!newValue) formValueToEditClone.value = JSON.parse(JSON.stringify(newValue))
   },
@@ -30,7 +28,7 @@ watch(
 )
 
 const isDiscardDisabled = computed(() => {
-  return JSON.stringify(formValueToEditClone.value) === JSON.stringify(formValueToEdit.value)
+  return JSON.stringify(formValueToEditClone.value) === JSON.stringify(model.value)
 })
 
 // Helper to dynamically determine the component type
@@ -50,7 +48,7 @@ const getFieldComponent = (type: string) => {
 }
 
 // Helper to get attributes for a field
-const getFieldAttributes = (field: FormField) => {
+const getFieldAttributes = (field: FieldDefinition) => {
   const attributes: Record<string, any> = {
     placeholder: field.placeholder || '',
   }
@@ -67,24 +65,19 @@ const getFieldAttributes = (field: FormField) => {
   return attributes
 }
 
-function getFieldById(id: number) {
-  return formValueToEditClone.value.find((item) => item.id === id)
+function getFieldByIndex(index: number) {
+  return formValueToEditClone.value[index]
 }
 
-function getModelValue(fieldId: number) {
-  console.log('getModelValue', fieldId)
-  const field = getFieldById(fieldId)
-  return field ? field.value : null
+function getModelValue(index: number) {
+  return formValueToEditClone.value[index] ?? null
 }
 
-function updateModelValue(fieldId: number, newValue: any, type: string) {
-  const field = getFieldById(fieldId)
-  if (field) {
-    if (type === 'checkbox') {
-      field.value = newValue === 'true' ? 'false' : 'true'
-    } else {
-      field.value = newValue
-    }
+function updateModelValue(index: number, newValue: any, type: string) {
+  if (type === 'checkbox') {
+    formValueToEditClone.value[index] = newValue === 'true' ? 'false' : 'true'
+  } else {
+    formValueToEditClone.value[index] = newValue
   }
 }
 
@@ -96,15 +89,15 @@ const saveChanges = () => {
 
 // Discard changes and reset the clone to the original values
 const discardChanges = () => {
-  formValueToEditClone.value = [...formValueToEdit.value]
+  formValueToEditClone.value = [...model.value]
 }
 </script>
 
 <template>
   <form @submit.prevent="saveChanges">
     <!-- Render dynamic form fields -->
-    <div v-for="field in props.formStructure" :key="field.id" class="form-field">
-      <slot :name="`${field.type}${field.id}`">
+    <div v-for="(field, index) in structure" :key="field.id" class="form-field">
+      <slot :name="`field_${field.id}`">
         <!-- Default content if no slot is provided -->
         <label :for="`field-${field.id}`">{{ field.label }}</label>
 
@@ -112,19 +105,16 @@ const discardChanges = () => {
         <component
           :is="getFieldComponent(field.type)"
           :id="`field-${field.id}`"
-          :value="getModelValue(field.id)"
-          @input="(event) => updateModelValue(field.id, event.target.value, field.type)"
+          :value="getModelValue(index)"
+          @input="(event) => updateModelValue(index, event.target.value, field.type)"
           v-bind="getFieldAttributes(field)"
         >
           <!-- Render options for select fields -->
-          <option
-            v-if="field.type === 'select'"
-            v-for="option in field.options"
-            :key="option"
-            :value="option"
-          >
-            {{ option }}
-          </option>
+          <template v-if="field.type === 'select'">
+            <option v-for="option in field.options" :key="option" :value="option">
+              {{ option }}
+            </option>
+          </template>
         </component>
       </slot>
     </div>
