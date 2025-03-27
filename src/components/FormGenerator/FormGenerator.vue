@@ -1,107 +1,64 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import type { FieldDefinition, FormModel, FormStructure } from '@/components/FormGenerator/types'
+import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
 
 // Props
 defineProps<{
-  structure: FormStructure
+  structure: FieldDefinition[]
 }>()
 
-const model = defineModel<FormModel>()
+const model = defineModel<ValueType[]>()
 
 // Emit updated values back to the parent
 const emit = defineEmits<{
   (e: 'save'): void
   (e: 'discard'): void
 }>()
-
-// const isDiscardDisabled = computed(() => {
-//   return JSON.stringify(model.value) === JSON.stringify(model.value)
-// })
-
-// Helper to dynamically determine the component type
-const getFieldComponent = (type: string) => {
-  switch (type) {
-    case 'input':
-      return 'input'
-    case 'textarea':
-      return 'textarea'
-    case 'checkbox':
-      return 'input' // Checkbox is still an input element
-    case 'select':
-      return 'select'
-    default:
-      return 'input'
-  }
-}
-
-// Helper to get attributes for a field
-const getFieldAttributes = (field: FieldDefinition) => {
-  const attributes: Record<string, any> = {
-    placeholder: field.placeholder || '',
-  }
-
-  if (field.type === 'checkbox') {
-    attributes.type = 'checkbox'
-    attributes.checked = getModelValue(field.id) === 'true' ? true : false
-  } else if (field.type === 'input') {
-    attributes.type = field.dataType === 'number' ? 'number' : 'text'
-  } else if (field.type === 'select') {
-    attributes.options = field.options || []
-  }
-
-  return attributes
-}
-
-function getFieldByIndex(index: number) {
-  return model.value[index]
-}
-
-function getModelValue(index: number) {
-  return model.value[index] ?? null
-}
-
-function updateModelValue(index: number, newValue: any, type: string) {
-  if (type === 'checkbox') {
-    model.value[index] = newValue === 'true' ? 'false' : 'true'
-  } else {
-    model.value[index] = newValue
-  }
-}
-
-// Save changes and emit updated values
-
-// Discard changes and reset the clone to the original values
 </script>
 
 <template>
-  <form @submit.prevent="emit('save')">
+  model {{ model }}
+  <form @submit.prevent="emit('save')" v-if="model" class="flex flex-col gap-1">
     <!-- Render dynamic form fields -->
-    <div v-for="(field, index) in structure" :key="field.id" class="form-field">
+    <div v-for="(field, index) in structure" :key="field.id">
       <slot :name="`field_${field.id}`">
         <!-- Default content if no slot is provided -->
         <label :for="`field-${field.id}`">{{ field.label }}</label>
 
-        <!-- Dynamic input types -->
-        <component
-          :is="getFieldComponent(field.type)"
+        <!-- Input field -->
+        <input
+          v-if="field.type === 'input'"
+          v-model="model[index]"
           :id="`field-${field.id}`"
-          :value="getModelValue(index)"
-          @input="(event) => updateModelValue(index, event.target.value, field.type)"
-          v-bind="getFieldAttributes(field)"
-        >
-          <!-- Render options for select fields -->
-          <template v-if="field.type === 'select'">
-            <option v-for="option in field.options" :key="option" :value="option">
-              {{ option }}
-            </option>
-          </template>
-        </component>
+          :type="field.dataType === 'number' ? 'number' : 'text'"
+        />
+
+        <!-- Textarea field -->
+        <textarea
+          v-if="typeof model[index] !== 'boolean' && field.type === 'textarea'"
+          :id="`field-${field.id}`"
+          v-model="model[index]"
+        ></textarea>
+
+        <!-- Checkbox field -->
+        <input
+          v-if="field.type === 'checkbox'"
+          v-model="model[index]"
+          type="checkbox"
+          :id="`field-${field.id}`"
+          :checked="model[index] === 'true' ? true : false"
+        />
+
+        <!-- Select field -->
+        <select v-if="field.type === 'select'" :id="`field-${field.id}`" v-model="model[index]">
+          <option v-for="option in field.options" :key="option" :value="option">
+            {{ option }}
+          </option>
+        </select>
       </slot>
     </div>
 
     <!-- Buttons -->
-    <div class="form-actions">
+    <div class="flex gap-1">
       <button type="button" @click="emit('discard')" :disabled="isDiscardDisabled">Discard</button>
       <button type="submit">Save</button>
     </div>
@@ -109,10 +66,6 @@ function updateModelValue(index: number, newValue: any, type: string) {
 </template>
 
 <style scoped>
-.form-field {
-  margin-bottom: 1rem;
-}
-
 label {
   display: block;
   margin-bottom: 0.5rem;
@@ -131,18 +84,6 @@ select {
 
 input[type='checkbox'] {
   width: auto;
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 button[type='button'] {
