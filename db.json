@@ -61,6 +61,78 @@
         }
       ],
       "values": ["Laptop", 1200, "High-performance laptop", true]
+    },
+    "employees": {
+      "structure": [
+        {
+          "id": 1,
+          "type": "input",
+          "label": "Employee Name",
+          "placeholder": "Enter employee name",
+          "dataType": "string"
+        },
+        {
+          "id": 2,
+          "type": "input",
+          "label": "Employee ID",
+          "placeholder": "Enter employee ID",
+          "dataType": "string"
+        },
+        {
+          "id": 3,
+          "type": "select",
+          "label": "Department",
+          "options": ["HR", "Engineering", "Marketing", "Sales"]
+        },
+        {
+          "id": 4,
+          "type": "checkbox",
+          "label": "Full-time Employee"
+        },
+        {
+          "id": 5,
+          "type": "textarea",
+          "label": "Additional Notes",
+          "placeholder": "Enter additional notes"
+        }
+      ],
+      "values": ["John Doe", "EMP123", "Engineering", true, "No additional notes"]
+    },
+    "orders": {
+      "structure": [
+        {
+          "id": 1,
+          "type": "input",
+          "label": "Order ID",
+          "placeholder": "Enter order ID",
+          "dataType": "string"
+        },
+        {
+          "id": 2,
+          "type": "input",
+          "label": "Customer Name",
+          "placeholder": "Enter customer name",
+          "dataType": "string"
+        },
+        {
+          "id": 3,
+          "type": "textarea",
+          "label": "Order Details",
+          "placeholder": "Enter order details"
+        },
+        {
+          "id": 4,
+          "type": "checkbox",
+          "label": "Order Shipped"
+        },
+        {
+          "id": 5,
+          "type": "select",
+          "label": "Shipping Method",
+          "options": ["Standard", "Express", "Overnight"]
+        }
+      ],
+      "values": ["ORD456", "Alice Smith", "2x Laptop, 1x Mouse", false, "Express"]
     }
   }
 }
