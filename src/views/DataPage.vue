@@ -74,7 +74,7 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
 
 <template>
   formValueToEdit {{ formValueToEdit }}
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col flex-grow gap-2">
     <div class="flex flex-col gap-0-2">
       <div class="flex justify-between flex-nowrap">
         <div>
