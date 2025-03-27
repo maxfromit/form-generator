@@ -48,6 +48,10 @@ watchEffect(() => {
   formValueToEdit.value = [...choosenFormValues.value]
 })
 
+const isValuesAndStructureLengthEqual = computed(
+  () => formValueToEdit.value.length === formStructure.value.length,
+)
+
 const resetToChoosen = () => {
   formValueToEdit.value = [...choosenFormValues.value]
 }
@@ -93,9 +97,16 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
         </nav>
       </div>
     </div>
-
+    <div v-if="!isValuesAndStructureLengthEqual" style="color: red">
+      Error: Values and structure length are not equal
+    </div>
     <GeneratedForm
-      v-if="!!formStructure && formStructure.length > 0 && !!formValueToEdit"
+      v-if="
+        !!formStructure &&
+        formStructure.length > 0 &&
+        !!formValueToEdit &&
+        isValuesAndStructureLengthEqual
+      "
       :structure="formStructure"
       v-model="formValueToEdit"
       @save="saveToStorage"
