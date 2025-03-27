@@ -18,7 +18,7 @@ export type FormModel = ValueType[]
 // Type for the structure and values of a form
 export type Form = {
   structure: FormStructure
-  values: FormModel[]
+  values: ValueType[]
 }
 
 // Type for the entire `form-data` object
