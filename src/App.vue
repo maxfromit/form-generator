@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import MainWithLinks from './components/MainWithLinks.vue'
+import HeaderWithLinks from './components/HeaderWithLinks.vue'
 </script>
 
 <template>
   <header>
-    <MainWithLinks />
+    <HeaderWithLinks />
   </header>
   <RouterView />
 </template>
