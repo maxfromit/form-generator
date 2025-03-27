@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
 import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
+import { hardcodedformData } from '@/const/formData'
 const router = useRouter()
 
 const store = useStore()
@@ -11,6 +12,10 @@ const store = useStore()
 const dataKey = computed(() => router.currentRoute.value.params.dataKey ?? null)
 const valueIndex = computed(() =>
   router.currentRoute.value.params.id ? router.currentRoute.value.params.id : null,
+)
+store.dispatch('fetchKeys')
+const formKeys = computed(() =>
+  store.state.keys.length > 0 ? store.state.keys : Object.keys(hardcodedformData),
 )
 
 watch(
@@ -23,10 +28,28 @@ watch(
   },
   { immediate: true },
 )
-const formStructure = computed(() => store.state.formStructure ?? [])
-const formValuesFromDb = computed(() => store.state.fetchedFormValues ?? [])
+const formStructure = computed(() =>
+  store.state.formStructure.length > 0
+    ? store.state.formStructure
+    : typeof dataKey.value === 'string' && hardcodedformData[dataKey.value].structure
+      ? hardcodedformData[dataKey.value].structure
+      : [],
+)
+
+const formValuesFromDb = computed(() =>
+  store.state.fetchedFormValues.length > 0
+    ? store.state.fetchedFormValues
+    : typeof dataKey.value === 'string' && hardcodedformData[dataKey.value].values
+      ? hardcodedformData[dataKey.value].values
+      : [],
+)
+
 const formValuesFromLocal = computed(() =>
-  dataKey.value ? store.state.localFormValues[dataKey.value]?.values || [] : [],
+  dataKey.value &&
+  store.state.localFormValues[dataKey.value]?.values &&
+  store.state.localFormValues[dataKey.value]?.values.length > 0
+    ? store.state.localFormValues[dataKey.value]?.values
+    : getClearedValues(),
 )
 
 const choosenFormValues = computed(() => {
@@ -71,20 +94,19 @@ const clearForm = () => {
 // const hasFormChanged = computed(() => {
 //   return JSON.stringify(formValueToEdit.value) !== JSON.stringify(choosenFormValues.value)
 // })
-
-console.log(' store.state.local', store.state?.localFormValues, typeof store.state?.localFormValues)
+const isNotBoolean = (value: ValueType) => typeof value !== 'boolean'
 </script>
 
 <template>
-  <div class="flex flex-col flex-grow gap-2">
-    <h1 v-if="!formStructure || formStructure.length === 0">Choose entity to get forms</h1>
+  <div v-if="formKeys.length > 0" class="flex flex-col flex-grow gap-2">
+    <h1 v-if="!formStructure || formStructure.length === 0">Choose entity to get form</h1>
     <div v-if="dataKey" class="flex flex-col gap-0-2">
       <div class="flex justify-between items-center flex-nowrap">
         <div>
           <h1 class="first-letter-uppercase">{{ dataKey }}</h1>
         </div>
         <div>
-          <button @click="clearForm">Clear</button>
+          <button @click="clearForm" title="Click to clear all fields in the form">Clear</button>
         </div>
       </div>
 
@@ -110,25 +132,28 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
       :structure="formStructure"
       v-model="formValueToEdit"
       @save="saveToStorage"
-      @discard="resetToChoosen"
+      @cancel="resetToChoosen"
     >
       <!-- Custom slots for specific fields -->
       <template v-slot:[`field_1`]="{ field, index, model }">
-        <div>Custom Input 1</div>
+        <div>Input From Slot 1: {{ field.label }}</div>
+
         <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
       </template>
 
-      <!-- <template v-slot:[`field_1`]>
-        <div>
-          Custom Input 1
-          {{ formValueToEdit[0] }}
-        </div>
-        <input v-model="scope.something" :id="`field-1`" type="text" />
+      <template v-slot:[`field_4`]="{ field, index, model }">
+        <div>Textarea From Slot 4: {{ field.label }}</div>
+        <textarea
+          v-if="isNotBoolean(model[index])"
+          v-model="model[index]"
+          :id="`field-${field.id}`"
+        />
       </template>
-      <template v-slot:[`textarea2`]>
-        <div>Custom Textarea 2</div>
-      </template> -->
     </GeneratedForm>
+  </div>
+
+  <div v-if="formKeys.length === 0" style="color: red">
+    <div>No data found</div>
   </div>
 </template>
 
@@ -147,5 +172,18 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #2da53b;
+  border-radius: 8px;
+}
+
+input[type='checkbox'] {
+  width: auto;
 }
 </style>
