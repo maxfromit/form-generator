@@ -26,7 +26,8 @@ const emit = defineEmits<{
     <!-- Render dynamic form fields -->
     <div class="flex flex-col gap-1 flex-grow">
       <div v-for="(field, index) in structure" :key="field.id">
-        <slot :name="`field_${field.id}`">
+        <!-- Scoped slot -->
+        <slot :name="`field_${field.id}`" :field="field" :index="index" :model="model">
           <!-- Default content if no slot is provided -->
           <label :for="`field-${field.id}`">{{ field.label }}</label>
 
