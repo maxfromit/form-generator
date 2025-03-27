@@ -9,7 +9,7 @@ const router = createRouter({
       component: () => import('../views/DynamicFormPage.vue'),
     },
     {
-      path: '/:dataKey/:id?',
+      path: '/:dataKey/:source?',
       name: 'data-key', // Single name for both routes
       component: () => import('../views/DynamicFormPage.vue'),
     },
