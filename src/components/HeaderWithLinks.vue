@@ -2,20 +2,21 @@
 import { onMounted, computed } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { useStore } from 'vuex'
+import { hardcodedformData } from '@/const/formData'
 
 const store = useStore()
 store.dispatch('fetchKeys')
 // onMounted(() => {
 //   store.dispatch('fetchFormData')
 // })
-
-const formKeys = computed(() => store.state.keys)
+const formKeys = computed(() =>
+  store.state.keys.length > 0 ? store.state.keys : Object.keys(hardcodedformData),
+)
 </script>
 
 <template>
   <div style="display: flex; flex-direction: column">
     <h1><RouterLink to="/">Form Generator</RouterLink></h1>
-
     <div class="flex gap-1">
       <nav v-for="dataKey in formKeys" :key="dataKey" style="text-transform: uppercase">
         <RouterLink :to="`/${dataKey}`">{{ dataKey }}</RouterLink>
