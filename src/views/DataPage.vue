@@ -73,13 +73,12 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
 </script>
 
 <template>
-  formValueToEdit {{ formValueToEdit }}
   <div class="flex flex-col flex-grow gap-2">
-    <div class="flex flex-col gap-0-2">
-      <div class="flex justify-between flex-nowrap">
+    <h1 v-if="!formStructure || formStructure.length === 0">Choose entity to get forms</h1>
+    <div v-if="dataKey" class="flex flex-col gap-0-2">
+      <div class="flex justify-between items-center flex-nowrap">
         <div>
-          <h1 v-if="dataKey" class="first-letter-uppercase">{{ dataKey }}</h1>
-          <div v-if="!formStructure || formStructure.length === 0">Choose entity to get forms</div>
+          <h1 class="first-letter-uppercase">{{ dataKey }}</h1>
         </div>
         <div>
           <button @click="clearForm">Clear</button>
