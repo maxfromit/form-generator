@@ -114,14 +114,15 @@ const toggleRawDataMenu = () => {
     <div class="flex justify-center" v-if="!formStructure || formStructure.length === 0">
       <div>Choose entity to get form</div>
     </div>
+
     <div v-if="dataKey" class="flex flex-col gap-0-2">
-      <div class="flex justify-between items-center flex-nowrap">
+      <div class="flex justify-between items-center flex-nowrap gap-1">
         <div>
           <h1 class="first-letter-uppercase">{{ getSpacedText(dataKey) }}</h1>
         </div>
         <div>
           <button @click="toggleRawDataMenu" title="Click to show form raw data">
-            {{ !showRawDataMenu ? 'Show Raw Data' : 'Hide Raw Data' }}
+            {{ !showRawDataMenu ? 'Show raw data' : 'Hide raw data' }}
           </button>
         </div>
       </div>
@@ -150,16 +151,16 @@ const toggleRawDataMenu = () => {
 
       <div v-if="formValuesFromLocal.length > 0" class="flex gap-1">
         <nav>
-          <RouterLink :to="`/${dataKey}/`">Fetched Data Set</RouterLink>
+          <RouterLink :to="`/${dataKey}/`">Fetched data set</RouterLink>
         </nav>
         <nav>
-          <RouterLink :to="`/${dataKey}/local`">Local Data Set</RouterLink>
+          <RouterLink :to="`/${dataKey}/local`">Local data set</RouterLink>
         </nav>
       </div>
     </div>
 
     <div v-if="!isValuesAndStructureLengthEqual" style="color: red">
-      Error: Values and structure length are not equal
+      Error: values and structure length are not equal
     </div>
 
     <GeneratedForm
@@ -176,13 +177,13 @@ const toggleRawDataMenu = () => {
     >
       <!-- Custom slots for specific fields -->
       <template v-if="!!isDataSetToShowSlots" v-slot:[`field_1`]="{ field, index, model }">
-        <div>Input From Slot 1: {{ field.label }}</div>
+        <div>Input from slot 1: {{ field.label }}</div>
 
         <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
       </template>
 
       <template v-if="!!isDataSetToShowSlots" v-slot:[`field_4`]="{ field, index, model }">
-        <div>Textarea From Slot 4: {{ field.label }}</div>
+        <div>Textarea from slot 4: {{ field.label }}</div>
         <textarea
           v-if="isNotBoolean(model[index])"
           v-model="model[index]"
