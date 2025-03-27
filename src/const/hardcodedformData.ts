@@ -1,7 +1,7 @@
 import type { FormCollection } from '@/components/FormGenerator/types'
 
 export const hardcodedformData: FormCollection = {
-  animals: {
+  ['animals-with-slots']: {
     structure: [
       {
         id: 1,
@@ -47,22 +47,11 @@ export const hardcodedformData: FormCollection = {
       },
       {
         id: 3,
-        type: 'textarea',
-        label: 'Instructions',
-        placeholder: 'Describe the steps',
-      },
-      {
-        id: 4,
         type: 'checkbox',
         label: 'Is Vegetarian',
       },
     ],
-    values: [
-      'Pasta Primavera',
-      'Pasta, Vegetables, Olive Oil',
-      'Cook pasta, sauté vegetables, mix together.',
-      true,
-    ],
+    values: ['Pasta Primavera', 'Pasta, Vegetables, Olive Oil', true],
   },
   movies: {
     structure: [
