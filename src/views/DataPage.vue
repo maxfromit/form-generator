@@ -2,7 +2,7 @@
 import { computed, watch, ref, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import type { FormModel, ValueType, FieldDefinition } from '@/components/FormGenerator/types'
+import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
 import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
 const router = useRouter()
 
@@ -65,10 +65,15 @@ const clearForm = () => {
   formValueToEdit.value = [...getClearedValues()]
 }
 
+// const hasFormChanged = computed(() => {
+//   return JSON.stringify(formValueToEdit.value) !== JSON.stringify(choosenFormValues.value)
+// })
+
 console.log(' store.state.local', store.state?.localFormValues, typeof store.state?.localFormValues)
 </script>
 
 <template>
+  formValueToEdit {{ formValueToEdit }}
   <div class="flex flex-col gap-2">
     <div class="flex flex-col gap-0-2">
       <div class="flex justify-between flex-nowrap">
@@ -113,38 +118,6 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
 </template>
 
 <style scoped>
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.flex-nowrap {
-  flex-wrap: nowrap;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.first-letter-uppercase::first-letter {
-  text-transform: uppercase;
-}
-
-.gap-0-2 {
-  gap: 0.2rem;
-}
-
-.gap-1 {
-  gap: 1rem;
-}
-
-.gap-2 {
-  gap: 2rem;
-}
-
 nav a.router-link-active {
   color: var(--color-text);
 }
@@ -159,20 +132,5 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
-}
-
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-
-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 </style>
