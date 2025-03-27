@@ -16,7 +16,7 @@ const formKeys = computed(() => store.state.keys)
   <div style="display: flex; flex-direction: column">
     <h1><RouterLink to="/">Form Generator</RouterLink></h1>
 
-    <div style="display: flex; gap: 1rem">
+    <div class="flex gap-1">
       <nav v-for="dataKey in formKeys" :key="dataKey" style="text-transform: uppercase">
         <RouterLink :to="`/${dataKey}`">{{ dataKey }}</RouterLink>
       </nav>
@@ -25,6 +25,14 @@ const formKeys = computed(() => store.state.keys)
 </template>
 
 <style scoped>
+.flex {
+  display: flex;
+}
+
+.gap-1 {
+  gap: 1rem;
+}
+
 h1 {
   font-weight: 500;
   font-size: 2.6rem;
