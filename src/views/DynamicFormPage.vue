@@ -23,7 +23,6 @@ watch(
   },
   { immediate: true },
 )
-console.log('store.state.localFormValues', store.state.localFormValues)
 const formStructure = computed(() => store.state.formStructure ?? [])
 const formValuesFromDb = computed(() => store.state.fetchedFormValues ?? [])
 const formValuesFromLocal = computed(() =>
