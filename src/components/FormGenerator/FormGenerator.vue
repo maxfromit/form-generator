@@ -11,12 +11,11 @@ const model = defineModel<ValueType[]>()
 // Emit updated values back to the parent
 const emit = defineEmits<{
   (e: 'save'): void
-  (e: 'discard'): void
+  (e: 'cancel'): void
 }>()
 </script>
 
 <template>
-  model {{ model }}
   <form
     @submit.prevent="emit('save')"
     v-if="model"
@@ -67,8 +66,19 @@ const emit = defineEmits<{
     <!-- Buttons -->
 
     <div class="flex gap-1 justify-end">
-      <button type="button" @click="emit('discard')">Discard</button>
-      <button type="submit">Save</button>
+      <button
+        type="button"
+        @click="emit('cancel')"
+        title="Click to reset the form data to its initial state"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        title="Click to save the data to local storage and be redirected to the Local Data Set tab"
+      >
+        Save
+      </button>
     </div>
   </form>
 </template>
