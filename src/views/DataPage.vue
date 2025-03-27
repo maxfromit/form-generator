@@ -104,15 +104,21 @@ console.log(' store.state.local', store.state?.localFormValues, typeof store.sta
       @discard="resetToChoosen"
     >
       <!-- Custom slots for specific fields -->
-      <template v-slot:[`field_1`]>
+      <template v-slot:[`field_1`]="{ field, index, model }">
+        <div>Custom Input 1</div>
+        <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
+      </template>
+
+      <!-- <template v-slot:[`field_1`]>
         <div>
           Custom Input 1
           {{ formValueToEdit[0] }}
         </div>
+        <input v-model="scope.something" :id="`field-1`" type="text" />
       </template>
       <template v-slot:[`textarea2`]>
         <div>Custom Textarea 2</div>
-      </template>
+      </template> -->
     </GeneratedForm>
   </div>
 </template>
