@@ -7,10 +7,15 @@ const formKeys = Object.keys(hardcodedformData)
 </script>
 
 <template>
-  <div style="display: flex; flex-direction: column">
+  <div class="flex flex-col gap-0-2">
     <h1><RouterLink to="/">Form Generator</RouterLink></h1>
-    <div class="flex gap-1">
-      <nav v-for="dataKey in formKeys" :key="dataKey" style="text-transform: uppercase">
+    <div class="flex flex-row flex-wrap gap-1" style="row-gap: 0.2rem">
+      <nav
+        v-for="dataKey in formKeys"
+        :key="dataKey"
+        style="text-transform: uppercase"
+        class="text-nowrap"
+      >
         <RouterLink :to="`/${dataKey}`">{{ dataKey.replace(/-/g, ' ') }}</RouterLink>
       </nav>
     </div>
@@ -18,14 +23,6 @@ const formKeys = Object.keys(hardcodedformData)
 </template>
 
 <style scoped>
-.flex {
-  display: flex;
-}
-
-.gap-1 {
-  gap: 1rem;
-}
-
 h1 {
   font-weight: 500;
   font-size: 2.6rem;
