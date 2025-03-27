@@ -1,19 +1,13 @@
 import { createStore } from 'vuex'
 import axios from 'axios'
 import { useStorage, StorageSerializers } from '@vueuse/core'
-import type { RemovableRef } from '@vueuse/core'
 
-import type {
-  FormModel,
-  ValueType,
-  FormStructure,
-  FormCollection,
-} from '@/components/FormGenerator/types'
+import type { ValueType, FormCollection, FieldDefinition } from '@/components/FormGenerator/types'
 
 type State = {
   keys: string[] // All keys from the database
-  formStructure: FormStructure | null // Structure of the form for a specific key
-  fetchedFormValues: FormModel // Array of values for a specific key
+  formStructure: FieldDefinition[] | null // Structure of the form for a specific key
+  fetchedFormValues: ValueType[] // Array of values for a specific key
   // localFormValues: RemovableRef<Record<string, { values: ValueType[] }> | null> // Reactive and synced with localStorage
   localFormValues: Record<string, { values: ValueType[] }> | null // Reactive and synced with localStorage
 }
@@ -35,10 +29,10 @@ export default createStore({
     setKeys(state: State, keys: string[]) {
       state.keys = keys
     },
-    setFormStructure(state: State, structure: FormStructure) {
+    setFormStructure(state: State, structure: FieldDefinition[]) {
       state.formStructure = structure
     },
-    setFormValues(state: State, values: FormModel) {
+    setFormValues(state: State, values: ValueType[]) {
       state.fetchedFormValues = values
     },
     clearFetchedForm(state: State) {
