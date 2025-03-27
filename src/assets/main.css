@@ -25,9 +25,8 @@ body {
 
 a,
 .green {
+  color: var(--color-text);
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
 }
 
 @media (hover: hover) {
@@ -70,6 +69,10 @@ a,
 
 .justify-end {
   justify-content: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
 }
 
 .items-center {
