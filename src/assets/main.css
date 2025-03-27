@@ -49,12 +49,20 @@ a,
   flex-direction: column;
 }
 
+.flex-grow {
+  flex-grow: 1;
+}
+
 .flex-nowrap {
   flex-wrap: nowrap;
 }
 
 .justify-between {
   justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
 }
 
 .first-letter-uppercase::first-letter {
