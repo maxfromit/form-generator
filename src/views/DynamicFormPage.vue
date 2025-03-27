@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
 import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
 import { hardcodedformData } from '@/const/hardcodedformData'
+
 const router = useRouter()
 
 const store = useStore()
@@ -72,23 +73,23 @@ const resetToChoosen = () => {
   formValues.value = [...choosenFormValues.value]
 }
 
-const uppercasedDataKey = () =>
-  dataKey.value ? dataKey.value.charAt(0).toUpperCase() + dataKey.value.slice(1) : ''
-
 const saveToStorage = () => {
   store.dispatch('saveToLocalStorage', {
     dataKey: dataKey.value,
     formValues: formValues.value,
   })
   if (valueSource.value === 'local') {
-    return alert(`Data for "${getSpacedText(uppercasedDataKey())}" has been saved successfully!`)
+    return alert(`Data for "${getSpacedText(getUppercasedDataKey())}" has been saved successfully!`)
   }
 
   alert(
-    `Data for "${getSpacedText(uppercasedDataKey())}" has been saved successfully! You will be redirected to the Local Data Set tab`,
+    `Data for "${getSpacedText(getUppercasedDataKey())}" has been saved successfully! You will be redirected to the Local Data Set tab`,
   )
   router.push(`/${dataKey.value}/local`)
 }
+
+const getUppercasedDataKey = () =>
+  dataKey.value ? dataKey.value.charAt(0).toUpperCase() + dataKey.value.slice(1) : ''
 
 const getSpacedText = (text: string) =>
   text && typeof text === 'string' ? text.replace(/-/g, ' ') : ''
@@ -96,11 +97,8 @@ const getSpacedText = (text: string) =>
 // const hasFormChanged = computed(() => {
 //   return JSON.stringify(formValueToEdit.value) !== JSON.stringify(choosenFormValues.value)
 // })
-const isNotBoolean = (value: ValueType) => typeof value !== 'boolean'
 
-const isDataSetToShowSlots = computed(
-  () => dataKey.value === 'customers-with-slots' || dataKey.value === 'animals-with-slots',
-)
+const isNotBoolean = (value: ValueType) => typeof value !== 'boolean'
 
 const showRawDataMenu = ref(false)
 
@@ -176,13 +174,19 @@ const toggleRawDataMenu = () => {
       @cancel="resetToChoosen"
     >
       <!-- Custom slots for specific fields -->
-      <template v-if="!!isDataSetToShowSlots" v-slot:[`field_1`]="{ field, index, model }">
+      <template
+        v-if="dataKey === 'animals-with-slots'"
+        v-slot:[`field_1`]="{ field, index, model }"
+      >
         <div>Input from slot 1: {{ field.label }}</div>
 
         <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
       </template>
 
-      <template v-if="!!isDataSetToShowSlots" v-slot:[`field_4`]="{ field, index, model }">
+      <template
+        v-if="dataKey === 'animals-with-slots'"
+        v-slot:[`field_4`]="{ field, index, model }"
+      >
         <div>Textarea from slot 4: {{ field.label }}</div>
         <textarea
           v-if="isNotBoolean(model[index])"
