@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { hardcodedformData } from '@/const/hardcodedformData'
 
-const formKeys = computed(() => Object.keys(hardcodedformData) ?? [])
+const formKeys = Object.keys(hardcodedformData)
 </script>
 
 <template>
