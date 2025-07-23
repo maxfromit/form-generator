@@ -1,7 +1,6 @@
 # Vue 3 Dynamic Form Generator
 
 A dynamic form generator application built with Vue 3, TypeScript, Vuex, Vue Router, and SCSS.  
-**Frontend Test Assignment**
 
 ## Project Goal
 
