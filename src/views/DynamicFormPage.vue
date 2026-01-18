@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
+import type { ValueType } from '@/components/FormGenerator/types'
 import { computed, ref, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
 import { hardcodedFormData } from '@/const/hardcodedFormData'
 import { convertDataKeyToTitle } from '@/utils/formatters'
+import { useForm } from '@/composables/useForm'
 
 const router = useRouter()
 const route = useRoute()
@@ -13,46 +14,15 @@ const route = useRoute()
 const dataKey = computed(() =>
   Array.isArray(route.params.dataKey) ? route.params.dataKey[0] : route.params.dataKey,
 )
-const sourceKey = computed(() => route.params.source ?? null)
+const sourceKey = computed(() =>
+  Array.isArray(route.params.source) ? route.params.source[0] : (route.params.source ?? null),
+)
 
 const store = useStore()
 
 const formKeys = computed(() => Object.keys(hardcodedFormData))
 
-const formValuesFromHardCoded = computed(() =>
-  !!hardcodedFormData[dataKey.value] && hardcodedFormData[dataKey.value].values
-    ? hardcodedFormData[dataKey.value].values
-    : [],
-)
-
-const formValuesFromLocal = computed(() =>
-  store.state.localFormValues && store.state.localFormValues[dataKey.value]?.values?.length > 0
-    ? store.state.localFormValues[dataKey.value]?.values
-    : [],
-)
-
-const formStructure = computed(() =>
-  dataKey.value && hardcodedFormData[dataKey.value].structure
-    ? hardcodedFormData[dataKey.value].structure
-    : [],
-)
-
-const getClearedValues = () =>
-  formStructure.value.map((field: FieldDefinition) => (field.type === 'checkbox' ? false : null))
-
-const resolvedFormValues = computed(() => {
-  if (sourceKey.value === 'local' && formValuesFromLocal.value?.length > 0) {
-    return [...formValuesFromLocal.value]
-  }
-  if (
-    (!sourceKey.value || sourceKey.value !== 'local') &&
-    formValuesFromHardCoded.value?.length > 0
-  ) {
-    return [...formValuesFromHardCoded.value]
-  }
-
-  return getClearedValues()
-})
+const { formStructure, resolvedFormValues, formValuesFromLocal } = useForm(dataKey, sourceKey)
 
 const formValues = ref<ValueType[]>([])
 
@@ -61,7 +31,7 @@ watchEffect(() => {
 })
 
 const isValuesAndStructureLengthEqual = computed(
-  () => formValues.value.length === formStructure.value.length,
+  () => formValues.value?.length === formStructure.value?.length,
 )
 
 const saveToStorage = () =>
