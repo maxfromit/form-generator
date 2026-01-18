@@ -113,6 +113,11 @@ $spacing-scale: (
 .items-center {
   align-items: center;
 }
+
+.uppercase {
+  text-transform: uppercase;
+}
+
 .first-letter-uppercase::first-letter {
   text-transform: uppercase;
 }

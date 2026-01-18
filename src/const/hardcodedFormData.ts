@@ -1,6 +1,6 @@
 import type { FormCollection } from '@/components/FormGenerator/types'
 
-export const hardcodedformData: FormCollection = {
+export const hardcodedFormData: FormCollection = {
   ['animals-with-slots']: {
     structure: [
       {

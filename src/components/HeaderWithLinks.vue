@@ -1,21 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import { hardcodedformData } from '@/const/hardcodedformData'
+import { hardcodedFormData } from '@/const/hardcodedFormData'
 
-const formKeys = Object.keys(hardcodedformData)
+const formKeys = Object.keys(hardcodedFormData)
 </script>
 
 <template>
   <div class="flex flex-col gap-xs pb-xs">
     <h1><RouterLink to="/">Form Generator</RouterLink></h1>
-    <div class="flex flex-row flex-wrap gap-md" style="row-gap: 0.2rem">
-      <nav
-        v-for="dataKey in formKeys"
-        :key="dataKey"
-        style="text-transform: uppercase"
-        class="text-nowrap"
-      >
+    <div class="flex flex-row flex-wrap gap-md">
+      <nav v-for="dataKey in formKeys" :key="dataKey" class="text-nowrap uppercase">
         <RouterLink :to="`/${dataKey}`">{{ dataKey.replace(/-/g, ' ') }}</RouterLink>
       </nav>
     </div>

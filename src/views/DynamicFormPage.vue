@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
 import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
-import { hardcodedformData } from '@/const/hardcodedformData'
+import { hardcodedFormData } from '@/const/hardcodedFormData'
 
 const router = useRouter()
 
@@ -18,19 +18,19 @@ const dataKey = computed(() =>
 )
 const valueSource = computed(() => router.currentRoute.value.params.source ?? null)
 
-const formKeys = computed(() => Object.keys(hardcodedformData))
+const formKeys = computed(() => Object.keys(hardcodedFormData))
 
 const formStructure = computed(() =>
-  dataKey.value && hardcodedformData[dataKey.value].structure
-    ? hardcodedformData[dataKey.value].structure
+  dataKey.value && hardcodedFormData[dataKey.value].structure
+    ? hardcodedFormData[dataKey.value].structure
     : [],
 )
 
 const formValuesFromHardCoded = computed(() =>
   typeof dataKey.value === 'string' &&
-  !!hardcodedformData[dataKey.value] &&
-  hardcodedformData[dataKey.value].values
-    ? hardcodedformData[dataKey.value].values
+  !!hardcodedFormData[dataKey.value] &&
+  hardcodedFormData[dataKey.value].values
+    ? hardcodedFormData[dataKey.value].values
     : [],
 )
 
