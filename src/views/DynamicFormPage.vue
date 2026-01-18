@@ -38,10 +38,6 @@ const isValuesAndStructureLengthEqual = computed(
   () => currentFormValues.value?.length === currentFormStructure.value?.length,
 )
 
-const isFormReadyToRender = computed(
-  () => currentFormStructure.value?.length > 0 && currentFormValues.value?.length > 0,
-)
-
 const saveToStorage = () =>
   store
     .dispatch('saveToLocalStorage', {
@@ -69,77 +65,80 @@ const isRawDataVisible = ref(false)
 
 <template>
   <div v-if="availableFormDataKeys?.length > 0" class="flex flex-col flex-grow gap-lg">
-    <div v-if="!currentFormStructure?.length" class="flex justify-center">
+    <template v-if="currentFormStructure?.length > 0">
+      <div v-if="currentDataKey" class="flex flex-col gap-xs">
+        <div class="flex justify-between items-center flex-nowrap gap-md">
+          <div>
+            <h1>{{ convertDataKeyToTitle(currentDataKey) }}</h1>
+          </div>
+          <div>
+            <button
+              @click="isRawDataVisible = !isRawDataVisible"
+              title="Click to show form raw data"
+            >
+              {{ !isRawDataVisible ? 'Show raw data' : 'Hide raw data' }}
+            </button>
+          </div>
+        </div>
+
+        <RawDataCard
+          v-if="isRawDataVisible"
+          :formStructure="currentFormStructure"
+          :resolvedFormValues="resolvedFormValues"
+        />
+
+        <div v-if="formValuesFromLocal?.length > 0" class="flex gap-md">
+          <nav>
+            <RouterLink :to="`/${currentDataKey}/`">"Fetched" data set</RouterLink>
+          </nav>
+          <nav>
+            <RouterLink :to="`/${currentDataKey}/local`">Local data set</RouterLink>
+          </nav>
+        </div>
+      </div>
+
+      <template v-if="isValuesAndStructureLengthEqual">
+        <GeneratedForm
+          v-if="currentFormValues?.length > 0"
+          :structure="currentFormStructure"
+          v-model="currentFormValues"
+          @save="saveToStorage"
+          @reset="resetToResolved"
+        >
+          <!-- Custom slots for specific fields -->
+          <template
+            v-if="currentDataKey === 'animals-with-slots'"
+            v-slot:[`field_1`]="{ field, index, model }"
+          >
+            <div>Input from slot 1: {{ field.label }}</div>
+
+            <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
+          </template>
+
+          <template
+            v-if="currentDataKey === 'animals-with-slots'"
+            v-slot:[`field_4`]="{ field, index, model }"
+          >
+            <div>Textarea from slot 4: {{ field.label }}</div>
+            <textarea
+              v-if="typeof model[index] !== 'boolean'"
+              v-model="model[index]"
+              :id="`field-${field.id}`"
+            />
+          </template>
+        </GeneratedForm>
+
+        <div v-else class="flex justify-center" style="color: red">
+          Error: there are no form values
+        </div>
+      </template>
+
+      <div v-else style="color: red">Error: values and structure length are not equal</div>
+    </template>
+
+    <div v-else class="flex justify-center">
       <div>Choose entity to get form</div>
     </div>
-
-    <div v-if="currentDataKey" class="flex flex-col gap-xs">
-      <div class="flex justify-between items-center flex-nowrap gap-md">
-        <div>
-          <h1>{{ convertDataKeyToTitle(currentDataKey) }}</h1>
-        </div>
-        <div>
-          <button @click="isRawDataVisible = !isRawDataVisible" title="Click to show form raw data">
-            {{ !isRawDataVisible ? 'Show raw data' : 'Hide raw data' }}
-          </button>
-        </div>
-      </div>
-
-      <RawDataCard
-        v-if="isRawDataVisible"
-        :formStructure="currentFormStructure"
-        :resolvedFormValues="resolvedFormValues"
-      />
-
-      <div v-if="formValuesFromLocal?.length > 0" class="flex gap-md">
-        <nav>
-          <RouterLink :to="`/${currentDataKey}/`">"Fetched" data set</RouterLink>
-        </nav>
-        <nav>
-          <RouterLink :to="`/${currentDataKey}/local`">Local data set</RouterLink>
-        </nav>
-      </div>
-    </div>
-
-    <template v-if="!isValuesAndStructureLengthEqual">
-      <div style="color: red">Error: values and structure length are not equal</div>
-    </template>
-
-    <template v-else>
-      <GeneratedForm
-        v-if="isFormReadyToRender"
-        :structure="currentFormStructure"
-        v-model="currentFormValues"
-        @save="saveToStorage"
-        @reset="resetToResolved"
-      >
-        <!-- Custom slots for specific fields -->
-        <template
-          v-if="currentDataKey === 'animals-with-slots'"
-          v-slot:[`field_1`]="{ field, index, model }"
-        >
-          <div>Input from slot 1: {{ field.label }}</div>
-
-          <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
-        </template>
-
-        <template
-          v-if="currentDataKey === 'animals-with-slots'"
-          v-slot:[`field_4`]="{ field, index, model }"
-        >
-          <div>Textarea from slot 4: {{ field.label }}</div>
-          <textarea
-            v-if="typeof model[index] !== 'boolean'"
-            v-model="model[index]"
-            :id="`field-${field.id}`"
-          />
-        </template>
-      </GeneratedForm>
-
-      <div v-else class="flex justify-center">
-        <div>Form is not ready to render</div>
-      </div>
-    </template>
   </div>
 
   <div v-if="!availableFormDataKeys?.length" style="color: red">
