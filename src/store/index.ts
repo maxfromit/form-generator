@@ -1,7 +1,7 @@
 import { createStore } from 'vuex'
 import { useStorage, StorageSerializers } from '@vueuse/core'
 
-import type { ValueType, FormCollection, FieldDefinition } from '@/components/FormGenerator/types'
+import type { ValueType } from '@/components/FormGenerator/types'
 
 type State = {
   localFormValues: Record<string, { values: ValueType[] }> | null // Reactive and synced with localStorage
