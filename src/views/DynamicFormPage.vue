@@ -1,10 +1,11 @@
 <script setup lang="ts">
-  import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
+import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
 import { computed, ref, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
 import { hardcodedFormData } from '@/const/hardcodedFormData'
+import { convertDataKeyToTitle } from '@/utils/formatters'
 
 const router = useRouter()
 const route = useRoute()
@@ -18,12 +19,6 @@ const store = useStore()
 
 const formKeys = computed(() => Object.keys(hardcodedFormData))
 
-const formStructure = computed(() =>
-  dataKey.value && hardcodedFormData[dataKey.value].structure
-    ? hardcodedFormData[dataKey.value].structure
-    : [],
-)
-
 const formValuesFromHardCoded = computed(() =>
   !!hardcodedFormData[dataKey.value] && hardcodedFormData[dataKey.value].values
     ? hardcodedFormData[dataKey.value].values
@@ -36,7 +31,16 @@ const formValuesFromLocal = computed(() =>
     : [],
 )
 
-const chosenFormValues = computed(() => {
+const formStructure = computed(() =>
+  dataKey.value && hardcodedFormData[dataKey.value].structure
+    ? hardcodedFormData[dataKey.value].structure
+    : [],
+)
+
+const getClearedValues = () =>
+  formStructure.value.map((field: FieldDefinition) => (field.type === 'checkbox' ? false : null))
+
+const resolvedFormValues = computed(() => {
   if (sourceKey.value === 'local' && formValuesFromLocal.value?.length > 0) {
     return [...formValuesFromLocal.value]
   }
@@ -50,55 +54,43 @@ const chosenFormValues = computed(() => {
   return getClearedValues()
 })
 
-const getClearedValues = () =>
-  formStructure.value.map((field: FieldDefinition) => (field.type === 'checkbox' ? false : null))
-
 const formValues = ref<ValueType[]>([])
 
 watchEffect(() => {
-  formValues.value = [...chosenFormValues.value]
+  formValues.value = [...resolvedFormValues.value]
 })
 
 const isValuesAndStructureLengthEqual = computed(
   () => formValues.value.length === formStructure.value.length,
 )
 
-const resetToChosen = () => {
-  formValues.value = [...chosenFormValues.value]
+const saveToStorage = () =>
+  store
+    .dispatch('saveToLocalStorage', {
+      dataKey: dataKey.value,
+      formValues: formValues.value,
+    })
+    .then(() => {
+      if (sourceKey.value === 'local') {
+        return alert(
+          `Data for "${convertDataKeyToTitle(dataKey.value)}" has been saved successfully!`,
+        )
+      }
+      alert(
+        `Data for "${convertDataKeyToTitle(dataKey.value)}" has been saved successfully! You will be redirected to the Local Data Set tab`,
+      )
+      router.push(`/${dataKey.value}/local`)
+    })
+
+const reset = () => {
+  formValues.value = [...resolvedFormValues.value]
 }
 
-const saveToStorage = () => {
-  store.dispatch('saveToLocalStorage', {
-    dataKey: dataKey.value,
-    formValues: formValues.value,
-  })
-  if (sourceKey.value === 'local') {
-    return alert(`Data for "${getSpacedText(getUpperCasedDataKey())}" has been saved successfully!`)
-  }
-
-  alert(
-    `Data for "${getSpacedText(getUpperCasedDataKey())}" has been saved successfully! You will be redirected to the Local Data Set tab`,
-  )
-  router.push(`/${dataKey.value}/local`)
-}
-
-const getUpperCasedDataKey = () =>
-  dataKey.value ? dataKey.value.charAt(0).toUpperCase() + dataKey.value.slice(1) : ''
-
-const getSpacedText = (text: string) =>
-  text && typeof text === 'string' ? text.replace(/-/g, ' ') : ''
-
-const isNotBoolean = (value: ValueType) => typeof value !== 'boolean'
-
-const showRawDataMenu = ref(false)
-
-const toggleRawDataMenu = () => {
-  showRawDataMenu.value = !showRawDataMenu.value
-}
+const isRawDataMenuShown = ref(false)
 </script>
 
 <template>
-  <div v-if="formKeys.length > 0" class="flex flex-col flex-grow gap-lg">
+  <div v-if="!!formKeys?.length" class="flex flex-col flex-grow gap-lg">
     <div class="flex justify-center" v-if="!formStructure || formStructure.length === 0">
       <div>Choose entity to get form</div>
     </div>
@@ -106,16 +98,19 @@ const toggleRawDataMenu = () => {
     <div v-if="dataKey" class="flex flex-col gap-xs">
       <div class="flex justify-between items-center flex-nowrap gap-md">
         <div>
-          <h1 class="first-letter-uppercase">{{ getSpacedText(dataKey) }}</h1>
+          <h1>{{ convertDataKeyToTitle(dataKey) }}</h1>
         </div>
         <div>
-          <button @click="toggleRawDataMenu" title="Click to show form raw data">
-            {{ !showRawDataMenu ? 'Show raw data' : 'Hide raw data' }}
+          <button
+            @click="isRawDataMenuShown = !isRawDataMenuShown"
+            title="Click to show form raw data"
+          >
+            {{ !isRawDataMenuShown ? 'Show raw data' : 'Hide raw data' }}
           </button>
         </div>
       </div>
 
-      <div v-if="showRawDataMenu" class="flex justify-center">
+      <div v-if="isRawDataMenuShown" class="flex justify-center">
         <div
           class="flex flex-col gap-md"
           style="
@@ -128,18 +123,18 @@ const toggleRawDataMenu = () => {
         >
           <div class="flex flex-col gap-xs">
             <div class="text-bold">Form structure:</div>
-            <div>{{ formStructure }}</div>
+            <code>{{ formStructure }}</code>
           </div>
           <div class="flex flex-col gap-xs">
             <div class="text-bold">Form values:</div>
-            <div>{{ chosenFormValues }}</div>
+            <code>{{ resolvedFormValues }}</code>
           </div>
         </div>
       </div>
 
       <div v-if="formValuesFromLocal.length > 0" class="flex gap-md">
         <nav>
-          <RouterLink :to="`/${dataKey}/`">Fetched data set</RouterLink>
+          <RouterLink :to="`/${dataKey}/`">"Fetched" data set</RouterLink>
         </nav>
         <nav>
           <RouterLink :to="`/${dataKey}/local`">Local data set</RouterLink>
@@ -161,7 +156,7 @@ const toggleRawDataMenu = () => {
       :structure="formStructure"
       v-model="formValues"
       @save="saveToStorage"
-      @cancel="resetToChosen"
+      @reset="reset"
     >
       <!-- Custom slots for specific fields -->
       <template
@@ -179,7 +174,7 @@ const toggleRawDataMenu = () => {
       >
         <div>Textarea from slot 4: {{ field.label }}</div>
         <textarea
-          v-if="isNotBoolean(model[index])"
+          v-if="typeof model[index] !== 'boolean'"
           v-model="model[index]"
           :id="`field-${field.id}`"
         />
@@ -187,14 +182,12 @@ const toggleRawDataMenu = () => {
     </GeneratedForm>
   </div>
 
-  <div v-if="formKeys.length === 0" style="color: red">
+  <div v-if="!formKeys?.length" style="color: red">
     <div>No data found</div>
   </div>
 </template>
 
 <style scoped>
-
-
 input,
 textarea,
 select {
