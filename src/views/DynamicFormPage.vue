@@ -42,7 +42,7 @@ const formValuesFromLocal = computed(() =>
     : [],
 )
 
-const choosenFormValues = computed(() => {
+const chosenFormValues = computed(() => {
   if (valueSource.value === 'local' && formValuesFromLocal.value?.length > 0) {
     return [...formValuesFromLocal.value]
   }
@@ -62,15 +62,15 @@ const getClearedValues = () =>
 const formValues = ref<ValueType[]>([])
 
 watchEffect(() => {
-  formValues.value = [...choosenFormValues.value]
+  formValues.value = [...chosenFormValues.value]
 })
 
 const isValuesAndStructureLengthEqual = computed(
   () => formValues.value.length === formStructure.value.length,
 )
 
-const resetToChoosen = () => {
-  formValues.value = [...choosenFormValues.value]
+const resetToChosen = () => {
+  formValues.value = [...chosenFormValues.value]
 }
 
 const saveToStorage = () => {
@@ -93,10 +93,6 @@ const getUppercasedDataKey = () =>
 
 const getSpacedText = (text: string) =>
   text && typeof text === 'string' ? text.replace(/-/g, ' ') : ''
-
-// const hasFormChanged = computed(() => {
-//   return JSON.stringify(formValueToEdit.value) !== JSON.stringify(choosenFormValues.value)
-// })
 
 const isNotBoolean = (value: ValueType) => typeof value !== 'boolean'
 
@@ -142,7 +138,7 @@ const toggleRawDataMenu = () => {
           </div>
           <div class="flex flex-col gap-0-2">
             <div class="text-bold">Form values:</div>
-            <div>{{ choosenFormValues }}</div>
+            <div>{{ chosenFormValues }}</div>
           </div>
         </div>
       </div>
@@ -171,7 +167,7 @@ const toggleRawDataMenu = () => {
       :structure="formStructure"
       v-model="formValues"
       @save="saveToStorage"
-      @cancel="resetToChoosen"
+      @cancel="resetToChosen"
     >
       <!-- Custom slots for specific fields -->
       <template
