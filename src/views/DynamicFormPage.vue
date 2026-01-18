@@ -1,22 +1,20 @@
 <script setup lang="ts">
+  import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
 import { computed, ref, watchEffect } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
-import type { ValueType, FieldDefinition } from '@/components/FormGenerator/types'
+import { useRoute, useRouter } from 'vue-router'
 import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
 import { hardcodedFormData } from '@/const/hardcodedFormData'
 
 const router = useRouter()
-
-const store = useStore()
+const route = useRoute()
 
 const dataKey = computed(() =>
-  router.currentRoute.value.params.dataKey &&
-  typeof router.currentRoute.value.params.dataKey === 'string'
-    ? router.currentRoute.value.params.dataKey
-    : null,
+  Array.isArray(route.params.dataKey) ? route.params.dataKey[0] : route.params.dataKey,
 )
-const valueSource = computed(() => router.currentRoute.value.params.source ?? null)
+const sourceKey = computed(() => route.params.source ?? null)
+
+const store = useStore()
 
 const formKeys = computed(() => Object.keys(hardcodedFormData))
 
@@ -27,27 +25,23 @@ const formStructure = computed(() =>
 )
 
 const formValuesFromHardCoded = computed(() =>
-  typeof dataKey.value === 'string' &&
-  !!hardcodedFormData[dataKey.value] &&
-  hardcodedFormData[dataKey.value].values
+  !!hardcodedFormData[dataKey.value] && hardcodedFormData[dataKey.value].values
     ? hardcodedFormData[dataKey.value].values
     : [],
 )
 
 const formValuesFromLocal = computed(() =>
-  dataKey.value &&
-  store.state.localFormValues &&
-  store.state.localFormValues[dataKey.value]?.values?.length > 0
+  store.state.localFormValues && store.state.localFormValues[dataKey.value]?.values?.length > 0
     ? store.state.localFormValues[dataKey.value]?.values
     : [],
 )
 
 const chosenFormValues = computed(() => {
-  if (valueSource.value === 'local' && formValuesFromLocal.value?.length > 0) {
+  if (sourceKey.value === 'local' && formValuesFromLocal.value?.length > 0) {
     return [...formValuesFromLocal.value]
   }
   if (
-    (!valueSource.value || valueSource.value !== 'local') &&
+    (!sourceKey.value || sourceKey.value !== 'local') &&
     formValuesFromHardCoded.value?.length > 0
   ) {
     return [...formValuesFromHardCoded.value]
@@ -78,17 +72,17 @@ const saveToStorage = () => {
     dataKey: dataKey.value,
     formValues: formValues.value,
   })
-  if (valueSource.value === 'local') {
-    return alert(`Data for "${getSpacedText(getUppercasedDataKey())}" has been saved successfully!`)
+  if (sourceKey.value === 'local') {
+    return alert(`Data for "${getSpacedText(getUpperCasedDataKey())}" has been saved successfully!`)
   }
 
   alert(
-    `Data for "${getSpacedText(getUppercasedDataKey())}" has been saved successfully! You will be redirected to the Local Data Set tab`,
+    `Data for "${getSpacedText(getUpperCasedDataKey())}" has been saved successfully! You will be redirected to the Local Data Set tab`,
   )
   router.push(`/${dataKey.value}/local`)
 }
 
-const getUppercasedDataKey = () =>
+const getUpperCasedDataKey = () =>
   dataKey.value ? dataKey.value.charAt(0).toUpperCase() + dataKey.value.slice(1) : ''
 
 const getSpacedText = (text: string) =>
