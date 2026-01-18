@@ -6,41 +6,42 @@ import { useStore } from 'vuex'
 const getClearedValues = (formStructure: FormStructure) =>
   formStructure.map((field: FieldDefinition) => (field.type === 'checkbox' ? false : null))
 
-const useForm = (dataKey: Ref<string>, sourceKey?: Ref<string>) => {
+const useForm = (currentDataKey: Ref<string>, currentSourceKey?: Ref<string>) => {
   const store = useStore()
 
   const formValuesFromHardCoded = computed(() =>
-    !!hardcodedFormData[dataKey.value] && hardcodedFormData[dataKey.value]?.values
-      ? hardcodedFormData[dataKey.value].values
+    !!hardcodedFormData[currentDataKey.value] && hardcodedFormData[currentDataKey.value]?.values
+      ? hardcodedFormData[currentDataKey.value].values
       : [],
   )
 
   const formValuesFromLocal = computed(() =>
-    store.state.localFormValues && !!store.state.localFormValues[dataKey.value]?.values?.length
-      ? store.state.localFormValues[dataKey.value].values
+    store.state.localFormValues &&
+    store.state.localFormValues[currentDataKey.value]?.values?.length > 0
+      ? store.state.localFormValues[currentDataKey.value].values
       : [],
   )
 
-  const formStructure = computed(() =>
-    dataKey && hardcodedFormData[dataKey.value]?.structure
-      ? hardcodedFormData[dataKey.value].structure
+  const currentFormStructure = computed(() =>
+    currentDataKey && hardcodedFormData[currentDataKey.value]?.structure
+      ? hardcodedFormData[currentDataKey.value].structure
       : [],
   )
 
   const resolvedFormValues = computed(() => {
-    if (sourceKey?.value) {
-      if (sourceKey?.value === 'local')
-        if (!!formValuesFromLocal.value?.length) return [...formValuesFromLocal.value]
+    if (currentSourceKey?.value) {
+      if (currentSourceKey?.value === 'local')
+        if (formValuesFromLocal.value?.length > 0) return [...formValuesFromLocal.value]
     }
 
-    if (!!formValuesFromHardCoded.value?.length) return [...formValuesFromHardCoded.value]
+    if (formValuesFromHardCoded.value?.length > 0) return [...formValuesFromHardCoded.value]
 
-    return getClearedValues(formStructure.value)
+    return getClearedValues(currentFormStructure.value)
   })
 
   return {
     resolvedFormValues,
-    formStructure,
+    currentFormStructure,
     formValuesFromLocal,
   }
 }

@@ -12,18 +12,21 @@ import RawDataCard from '@/components/RawDataCard.vue'
 const router = useRouter()
 const route = useRoute()
 
-const dataKey = computed(() =>
+const currentDataKey = computed(() =>
   Array.isArray(route.params.dataKey) ? route.params.dataKey[0] : route.params.dataKey,
 )
-const sourceKey = computed(() =>
+const currentSourceKey = computed(() =>
   Array.isArray(route.params.source) ? route.params.source[0] : (route.params.source ?? null),
 )
 
 const store = useStore()
 
-const formKeys = Object.keys(hardcodedFormData)
+const availableFormDataKeys = Object.keys(hardcodedFormData)
 
-const { formStructure, resolvedFormValues, formValuesFromLocal } = useForm(dataKey, sourceKey)
+const { currentFormStructure, resolvedFormValues, formValuesFromLocal } = useForm(
+  currentDataKey,
+  currentSourceKey,
+)
 
 const currentFormValues = ref<ValueType[]>([])
 
@@ -32,25 +35,29 @@ watchEffect(() => {
 })
 
 const isValuesAndStructureLengthEqual = computed(
-  () => currentFormValues.value?.length === formStructure.value?.length,
+  () => currentFormValues.value?.length === currentFormStructure.value?.length,
+)
+
+const isFormReadyToRender = computed(
+  () => currentFormStructure.value?.length > 0 && currentFormValues.value?.length > 0,
 )
 
 const saveToStorage = () =>
   store
     .dispatch('saveToLocalStorage', {
-      dataKey: dataKey.value,
+      dataKey: currentDataKey.value,
       formValues: currentFormValues.value,
     })
     .then(() => {
-      if (sourceKey.value === 'local') {
+      if (currentSourceKey.value === 'local') {
         return alert(
-          `Data for "${convertDataKeyToTitle(dataKey.value)}" has been saved successfully!`,
+          `Data for "${convertDataKeyToTitle(currentDataKey.value)}" has been saved successfully!`,
         )
       }
       alert(
-        `Data for "${convertDataKeyToTitle(dataKey.value)}" has been saved successfully! You will be redirected to the Local Data Set tab`,
+        `Data for "${convertDataKeyToTitle(currentDataKey.value)}" has been saved successfully! You will be redirected to the Local Data Set tab`,
       )
-      router.push(`/${dataKey.value}/local`)
+      router.push(`/${currentDataKey.value}/local`)
     })
 
 const resetToResolved = () => {
@@ -61,15 +68,15 @@ const isRawDataVisible = ref(false)
 </script>
 
 <template>
-  <div v-if="!!formKeys?.length" class="flex flex-col flex-grow gap-lg">
-    <div class="flex justify-center" v-if="!formStructure || formStructure.length === 0">
+  <div v-if="availableFormDataKeys?.length > 0" class="flex flex-col flex-grow gap-lg">
+    <div v-if="!currentFormStructure?.length" class="flex justify-center">
       <div>Choose entity to get form</div>
     </div>
 
-    <div v-if="dataKey" class="flex flex-col gap-xs">
+    <div v-if="currentDataKey" class="flex flex-col gap-xs">
       <div class="flex justify-between items-center flex-nowrap gap-md">
         <div>
-          <h1>{{ convertDataKeyToTitle(dataKey) }}</h1>
+          <h1>{{ convertDataKeyToTitle(currentDataKey) }}</h1>
         </div>
         <div>
           <button @click="isRawDataVisible = !isRawDataVisible" title="Click to show form raw data">
@@ -80,56 +87,62 @@ const isRawDataVisible = ref(false)
 
       <RawDataCard
         v-if="isRawDataVisible"
-        :formStructure="formStructure"
+        :formStructure="currentFormStructure"
         :resolvedFormValues="resolvedFormValues"
       />
 
-      <div v-if="formValuesFromLocal.length > 0" class="flex gap-md">
+      <div v-if="formValuesFromLocal?.length > 0" class="flex gap-md">
         <nav>
-          <RouterLink :to="`/${dataKey}/`">"Fetched" data set</RouterLink>
+          <RouterLink :to="`/${currentDataKey}/`">"Fetched" data set</RouterLink>
         </nav>
         <nav>
-          <RouterLink :to="`/${dataKey}/local`">Local data set</RouterLink>
+          <RouterLink :to="`/${currentDataKey}/local`">Local data set</RouterLink>
         </nav>
       </div>
     </div>
 
-    <div v-if="!isValuesAndStructureLengthEqual" style="color: red">
-      Error: values and structure length are not equal
-    </div>
+    <template v-if="!isValuesAndStructureLengthEqual">
+      <div style="color: red">Error: values and structure length are not equal</div>
+    </template>
 
-    <GeneratedForm
-      v-if="!!formStructure?.length && !!currentFormValues && isValuesAndStructureLengthEqual"
-      :structure="formStructure"
-      v-model="currentFormValues"
-      @save="saveToStorage"
-      @reset="resetToResolved"
-    >
-      <!-- Custom slots for specific fields -->
-      <template
-        v-if="dataKey === 'animals-with-slots'"
-        v-slot:[`field_1`]="{ field, index, model }"
+    <template v-else>
+      <GeneratedForm
+        v-if="isFormReadyToRender"
+        :structure="currentFormStructure"
+        v-model="currentFormValues"
+        @save="saveToStorage"
+        @reset="resetToResolved"
       >
-        <div>Input from slot 1: {{ field.label }}</div>
+        <!-- Custom slots for specific fields -->
+        <template
+          v-if="currentDataKey === 'animals-with-slots'"
+          v-slot:[`field_1`]="{ field, index, model }"
+        >
+          <div>Input from slot 1: {{ field.label }}</div>
 
-        <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
-      </template>
+          <input v-model="model[index]" :id="`field-${field.id}`" type="text" />
+        </template>
 
-      <template
-        v-if="dataKey === 'animals-with-slots'"
-        v-slot:[`field_4`]="{ field, index, model }"
-      >
-        <div>Textarea from slot 4: {{ field.label }}</div>
-        <textarea
-          v-if="typeof model[index] !== 'boolean'"
-          v-model="model[index]"
-          :id="`field-${field.id}`"
-        />
-      </template>
-    </GeneratedForm>
+        <template
+          v-if="currentDataKey === 'animals-with-slots'"
+          v-slot:[`field_4`]="{ field, index, model }"
+        >
+          <div>Textarea from slot 4: {{ field.label }}</div>
+          <textarea
+            v-if="typeof model[index] !== 'boolean'"
+            v-model="model[index]"
+            :id="`field-${field.id}`"
+          />
+        </template>
+      </GeneratedForm>
+
+      <div v-else class="flex justify-center">
+        <div>Form is not ready to render</div>
+      </div>
+    </template>
   </div>
 
-  <div v-if="!formKeys?.length" style="color: red">
+  <div v-if="!availableFormDataKeys?.length" style="color: red">
     <div>No data found</div>
   </div>
 </template>
