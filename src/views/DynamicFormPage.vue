@@ -20,25 +20,25 @@ const sourceKey = computed(() =>
 
 const store = useStore()
 
-const formKeys = computed(() => Object.keys(hardcodedFormData))
+const formKeys = Object.keys(hardcodedFormData)
 
 const { formStructure, resolvedFormValues, formValuesFromLocal } = useForm(dataKey, sourceKey)
 
-const formValues = ref<ValueType[]>([])
+const currentFormValues = ref<ValueType[]>([])
 
 watchEffect(() => {
-  formValues.value = [...resolvedFormValues.value]
+  currentFormValues.value = [...resolvedFormValues.value]
 })
 
 const isValuesAndStructureLengthEqual = computed(
-  () => formValues.value?.length === formStructure.value?.length,
+  () => currentFormValues.value?.length === formStructure.value?.length,
 )
 
 const saveToStorage = () =>
   store
     .dispatch('saveToLocalStorage', {
       dataKey: dataKey.value,
-      formValues: formValues.value,
+      formValues: currentFormValues.value,
     })
     .then(() => {
       if (sourceKey.value === 'local') {
@@ -52,11 +52,11 @@ const saveToStorage = () =>
       router.push(`/${dataKey.value}/local`)
     })
 
-const reset = () => {
-  formValues.value = [...resolvedFormValues.value]
+const resetToResolved = () => {
+  currentFormValues.value = [...resolvedFormValues.value]
 }
 
-const isRawDataMenuShown = ref(false)
+const isRawDataVisible = ref(false)
 </script>
 
 <template>
@@ -71,16 +71,13 @@ const isRawDataMenuShown = ref(false)
           <h1>{{ convertDataKeyToTitle(dataKey) }}</h1>
         </div>
         <div>
-          <button
-            @click="isRawDataMenuShown = !isRawDataMenuShown"
-            title="Click to show form raw data"
-          >
-            {{ !isRawDataMenuShown ? 'Show raw data' : 'Hide raw data' }}
+          <button @click="isRawDataVisible = !isRawDataVisible" title="Click to show form raw data">
+            {{ !isRawDataVisible ? 'Show raw data' : 'Hide raw data' }}
           </button>
         </div>
       </div>
 
-      <div v-if="isRawDataMenuShown" class="flex justify-center">
+      <div v-if="isRawDataVisible" class="flex justify-center">
         <div
           class="flex flex-col gap-md"
           style="
@@ -117,16 +114,11 @@ const isRawDataMenuShown = ref(false)
     </div>
 
     <GeneratedForm
-      v-if="
-        !!formStructure &&
-        formStructure.length > 0 &&
-        !!formValues &&
-        isValuesAndStructureLengthEqual
-      "
+      v-if="!!formStructure?.length && !!currentFormValues && isValuesAndStructureLengthEqual"
       :structure="formStructure"
-      v-model="formValues"
+      v-model="currentFormValues"
       @save="saveToStorage"
-      @reset="reset"
+      @reset="resetToResolved"
     >
       <!-- Custom slots for specific fields -->
       <template
