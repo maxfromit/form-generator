@@ -1,6 +1,5 @@
 import { createStore } from 'vuex'
 import { useStorage, StorageSerializers } from '@vueuse/core'
-
 import type { ValueType } from '@/components/FormGenerator/types'
 
 type State = {
