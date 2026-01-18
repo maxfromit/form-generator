@@ -3,10 +3,11 @@ import type { ValueType } from '@/components/FormGenerator/types'
 import { computed, ref, watchEffect } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
-import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
 import { hardcodedFormData } from '@/const/hardcodedFormData'
 import { convertDataKeyToTitle } from '@/utils/formatters'
 import { useForm } from '@/composables/useForm'
+import GeneratedForm from '@/components/FormGenerator/FormGenerator.vue'
+import RawDataCard from '@/components/RawDataCard.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -77,27 +78,11 @@ const isRawDataVisible = ref(false)
         </div>
       </div>
 
-      <div v-if="isRawDataVisible" class="flex justify-center">
-        <div
-          class="flex flex-col gap-md"
-          style="
-            max-width: 22rem;
-            background: #f9f9f9;
-            padding: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-          "
-        >
-          <div class="flex flex-col gap-xs">
-            <div class="text-bold">Form structure:</div>
-            <code>{{ formStructure }}</code>
-          </div>
-          <div class="flex flex-col gap-xs">
-            <div class="text-bold">Form values:</div>
-            <code>{{ resolvedFormValues }}</code>
-          </div>
-        </div>
-      </div>
+      <RawDataCard
+        v-if="isRawDataVisible"
+        :formStructure="formStructure"
+        :resolvedFormValues="resolvedFormValues"
+      />
 
       <div v-if="formValuesFromLocal.length > 0" class="flex gap-md">
         <nav>
