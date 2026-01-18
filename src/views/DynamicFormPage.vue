@@ -199,21 +199,6 @@ const toggleRawDataMenu = () => {
 </template>
 
 <style scoped>
-nav a.router-link-active {
-  color: var(--color-text);
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-}
-
-nav a.router-link-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-}
-
 .text-bold {
   font-weight: bold;
 }

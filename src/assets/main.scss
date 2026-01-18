@@ -27,6 +27,22 @@ a {
   text-decoration: none;
 }
 
+nav a.router-link-active {
+  color: var(--color-text);
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+nav a.router-link-active:hover {
+  background-color: transparent;
+  cursor: default;
+}
+
+nav a {
+  display: inline-block;
+}
+
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
