@@ -193,9 +193,7 @@ const toggleRawDataMenu = () => {
 </template>
 
 <style scoped>
-.text-bold {
-  font-weight: bold;
-}
+
 
 input,
 textarea,
