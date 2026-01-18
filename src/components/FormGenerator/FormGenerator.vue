@@ -17,10 +17,10 @@ const emit = defineEmits<{
   <form
     @submit.prevent="emit('save')"
     v-if="model"
-    class="flex flex-col gap-1 flex-grow"
+    class="flex flex-col gap-md grow"
     style="padding-bottom: 1rem"
   >
-    <div class="flex flex-col gap-1 flex-grow">
+    <div class="flex flex-col gap-md grow">
       <div v-for="(field, index) in structure" :key="field.id">
         <slot :name="`field_${field.id}`" :field="field" :index="index" :model="model">
           <label :for="`field-${field.id}`">{{ field.label }}</label>
@@ -54,9 +54,9 @@ const emit = defineEmits<{
         </slot>
       </div>
     </div>
-    <!-- Buttons -->
 
-    <div class="flex gap-1 justify-end">
+    <!-- Buttons -->
+    <div class="flex gap-md justify-end">
       <button
         type="button"
         @click="emit('cancel')"

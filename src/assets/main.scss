@@ -1,0 +1,125 @@
+@import './base.css';
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  max-width: 500px;
+  font-weight: normal;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2rem;
+  padding: 0 1rem;
+}
+
+@media (min-width: 550px) {
+  #app {
+    min-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+
+$spacing-scale: (
+  'xs': 0.2rem,
+  'sm': 0.4rem,
+  'md': 1rem,
+  'lg': 2rem,
+);
+
+@each $key, $value in $spacing-scale {
+  .gap-#{$key} {
+    gap: $value;
+  }
+  .p-#{$key} {
+    padding: $value;
+  }
+  .px-#{$key} {
+    padding-left: $value;
+    padding-right: $value;
+  }
+  .py-#{$key} {
+    padding-top: $value;
+    padding-bottom: $value;
+  }
+  .pt-#{$key} {
+    padding-top: $value;
+  }
+  .pb-#{$key} {
+    padding-bottom: $value;
+  }
+  .pl-#{$key} {
+    padding-left: $value;
+  }
+  .pr-#{$key} {
+    padding-right: $value;
+  }
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.items-center {
+  align-items: center;
+}
+.first-letter-uppercase::first-letter {
+  text-transform: uppercase;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

@@ -104,13 +104,13 @@ const toggleRawDataMenu = () => {
 </script>
 
 <template>
-  <div v-if="formKeys.length > 0" class="flex flex-col flex-grow gap-2">
+  <div v-if="formKeys.length > 0" class="flex flex-col flex-grow gap-lg">
     <div class="flex justify-center" v-if="!formStructure || formStructure.length === 0">
       <div>Choose entity to get form</div>
     </div>
 
-    <div v-if="dataKey" class="flex flex-col gap-0-2">
-      <div class="flex justify-between items-center flex-nowrap gap-1">
+    <div v-if="dataKey" class="flex flex-col gap-xs">
+      <div class="flex justify-between items-center flex-nowrap gap-md">
         <div>
           <h1 class="first-letter-uppercase">{{ getSpacedText(dataKey) }}</h1>
         </div>
@@ -123,7 +123,7 @@ const toggleRawDataMenu = () => {
 
       <div v-if="showRawDataMenu" class="flex justify-center">
         <div
-          class="flex flex-col gap-1"
+          class="flex flex-col gap-md"
           style="
             max-width: 22rem;
             background: #f9f9f9;
@@ -132,18 +132,18 @@ const toggleRawDataMenu = () => {
             border-radius: 8px;
           "
         >
-          <div class="flex flex-col gap-0-2">
+          <div class="flex flex-col gap-xs">
             <div class="text-bold">Form structure:</div>
             <div>{{ formStructure }}</div>
           </div>
-          <div class="flex flex-col gap-0-2">
+          <div class="flex flex-col gap-xs">
             <div class="text-bold">Form values:</div>
             <div>{{ chosenFormValues }}</div>
           </div>
         </div>
       </div>
 
-      <div v-if="formValuesFromLocal.length > 0" class="flex gap-1">
+      <div v-if="formValuesFromLocal.length > 0" class="flex gap-md">
         <nav>
           <RouterLink :to="`/${dataKey}/`">Fetched data set</RouterLink>
         </nav>

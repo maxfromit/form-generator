@@ -7,9 +7,9 @@ const formKeys = Object.keys(hardcodedformData)
 </script>
 
 <template>
-  <div class="flex flex-col gap-0-2">
+  <div class="flex flex-col gap-xs pb-xs">
     <h1><RouterLink to="/">Form Generator</RouterLink></h1>
-    <div class="flex flex-row flex-wrap gap-1" style="row-gap: 0.2rem">
+    <div class="flex flex-row flex-wrap gap-md" style="row-gap: 0.2rem">
       <nav
         v-for="dataKey in formKeys"
         :key="dataKey"
