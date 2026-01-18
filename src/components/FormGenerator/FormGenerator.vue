@@ -9,7 +9,7 @@ const model = defineModel<ValueType[]>()
 
 const emit = defineEmits<{
   (e: 'save'): void
-  (e: 'cancel'): void
+  (e: 'reset'): void
 }>()
 </script>
 
@@ -59,10 +59,10 @@ const emit = defineEmits<{
     <div class="flex gap-md justify-end">
       <button
         type="button"
-        @click="emit('cancel')"
+        @click="emit('reset')"
         title="Click to reset the form data to its initial state"
       >
-        Cancel
+        Reset
       </button>
 
       <button
